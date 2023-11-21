@@ -11,12 +11,14 @@ import (
 type LocatorInterface interface {
 	GetIP() (string, error)
 	GetLocation(ip string) (*contracts.Location, error)
-	GetVPN() (bool, error)
+	GetVPN([]string) (bool, error)
 }
 
 // KeeperInterface defines the interface for database operations
 type KeeperInterface interface {
 	StoreLocation(location *contracts.Location) error
+	AddVPNInterface(interfaceName string) error
+	GetVPNInterfaces() ([]string, error)
 }
 
 type Locator struct {
@@ -32,6 +34,15 @@ func NewLocator(api *apiclient.APIClient, dbapi *dbclient.LocationKeeper) *Locat
 }
 
 func (l *Locator) Show() {
+	vpninterfaces, err := l.dbclient.GetVPNInterfaces()
+	if err != nil {
+		warnln(err.Error())
+	}
+
+	vpn, err := l.client.GetVPN(vpninterfaces)
+	if err != nil {
+		warnln(err.Error())
+	}
 	// Fetching data from IP API
 	ip, err := l.client.GetIP()
 	if err != nil {
@@ -41,32 +52,64 @@ func (l *Locator) Show() {
 	if err != nil {
 		errorln(err.Error())
 	}
+
+	if vpn {
+		location.Vpn = true
+	}
+
+	// output to stding colorized
 	location.Output(
 		"country",
 		"regionname",
 		"city",
 		"timezone",
 		"ip",
+		"vpn",
 	)
+}
 
-	// NOTE: full output avaiable
-	// location.Output(
-	// 	"Status",
-	// 	"Country",
-	// 	"CountryCode",
-	// 	"Region",
-	// 	"RegionName",
-	// 	"Zip",
-	// 	"City",
-	// 	"Lat",
-	// 	"Lon",
-	// 	"Timezone",
-	// 	"Isp",
-	// 	"Org",
-	// 	"As",
-	// 	"IP",
-	// 	"Date",
-	// )
+func (l *Locator) ShowFull() {
+	vpninterfaces, err := l.dbclient.GetVPNInterfaces()
+	if err != nil {
+		warnln(err.Error())
+	}
+
+	vpn, err := l.client.GetVPN(vpninterfaces)
+	if err != nil {
+		warnln(err.Error())
+	}
+	// Fetching data from IP API
+	ip, err := l.client.GetIP()
+	if err != nil {
+		errorln(err.Error())
+	}
+	location, err := l.client.GetLocation(ip)
+	if err != nil {
+		errorln(err.Error())
+	}
+
+	if vpn {
+		location.Vpn = true
+	}
+
+	// output to stding colorized
+	location.Output(
+		"status",
+		"country",
+		"countrycode",
+		"region",
+		"regionname",
+		"zip",
+		"city",
+		"lat",
+		"lon",
+		"timezone",
+		"isp",
+		"org",
+		"as",
+		"ip",
+		"vpn",
+	)
 }
 
 func (l *Locator) Store() {

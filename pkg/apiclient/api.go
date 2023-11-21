@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"regexp"
 
 	"github.com/s-yakubovskiy/whereami/pkg/contracts"
 
@@ -54,29 +53,25 @@ func (l *APIClient) GetLocation(ip string) (*contracts.Location, error) {
 	return result, nil
 }
 
-func (l *APIClient) GetVPN() (bool, error) {
-	// Fetch all routes from all tables
-	routes, err := netlink.RouteList(nil, netlink.FAMILY_ALL)
+func (l *APIClient) GetVPN(vpninterfaces []string) (bool, error) {
+	// Fetch all network interfaces
+	links, err := netlink.LinkList()
 	if err != nil {
-		return false, fmt.Errorf("error fetching routes: %w", err)
+		return false, fmt.Errorf("error fetching network interfaces: %w", err)
 	}
 
-	for _, route := range routes {
-		fmt.Printf("%+v\n", route.Protocol)
-		if route.Dst == nil { // Check for a nil Dst (default route)
-			link, err := netlink.LinkByIndex(route.LinkIndex)
-			if err != nil {
-				return false, fmt.Errorf("error fetching interface for route: %w", err)
-			}
+	// Create a map for efficient lookup
+	vpnInterfaceMap := make(map[string]struct{})
+	for _, vpnInterface := range vpninterfaces {
+		vpnInterfaceMap[vpnInterface] = struct{}{}
+	}
 
-			// Check if the interface matches common VPN patterns
-			if matched, _ := regexp.MatchString(`^(tun|wg)\d`, link.Attrs().Name); matched {
-				if route.Src != nil && route.Protocol == 4 {
-					return true, nil // VPN with static preferred source detected
-				}
-			}
+	// Check if any of the system's interfaces are in vpninterfaces
+	for _, link := range links {
+		if _, exists := vpnInterfaceMap[link.Attrs().Name]; exists {
+			return true, nil
 		}
 	}
 
-	return false, nil // No VPN Detected
+	return false, nil // No VPN interface found in the system's network interfaces
 }

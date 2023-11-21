@@ -1,0 +1,7 @@
+log_level: debug
+database:
+  enabled: true
+  type: sqlite
+  path: ~/work/common/whereami_locations.sqlite
+crontab_tasks:
+  - schedule: "@every 10s"

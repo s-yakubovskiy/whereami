@@ -1,7 +1,11 @@
 package main
 
+import (
+	"github.com/s-yakubovskiy/whereami/config"
+)
+
 func init() {
-	// TODO: config reading
+	config.Init()
 }
 
 func main() {

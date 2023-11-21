@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 )
 
 func println(message, color string) {
@@ -13,12 +12,10 @@ func println(message, color string) {
 
 func errorln(message string) {
 	println(message, C_RED)
-	os.Exit(1)
 }
 
 func warnln(message string) {
 	println(message, C_YELLOW)
-	os.Exit(0)
 }
 
 func successln(message string) {
@@ -32,7 +29,7 @@ func infoln(message string) {
 func PrettyPrint(v interface{}) string {
 	prettyData, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
-		log.Fatal("Failed to generate JSON", err)
+		log.Println("Failed to generate JSON", err)
 	}
 	return string(prettyData)
 }

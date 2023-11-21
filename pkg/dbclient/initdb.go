@@ -32,5 +32,25 @@ func (s *LocationKeeper) InitDB() error {
 		return err
 	}
 
+	// vpn_interfaces table
+	createVPNInterfacesTableSQL := `
+    CREATE TABLE IF NOT EXISTS vpn_interfaces (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        interface_name TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );`
+
+	// ... existing code to prepare and execute statement ...
+	stmt, err = s.db.Prepare(createVPNInterfacesTableSQL)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

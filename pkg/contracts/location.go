@@ -24,6 +24,7 @@ type Location struct {
 	As          string  `json:"as"`
 	IP          string  `json:"query"`
 	Date        string  `json:"date"`
+	Vpn         bool    `json:"vpn"`
 }
 
 func (l *Location) Output(fields ...string) {

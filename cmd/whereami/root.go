@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/s-yakubovskiy/whereami/config"
 	"github.com/s-yakubovskiy/whereami/pkg/apiclient"
 	"github.com/s-yakubovskiy/whereami/pkg/dbclient"
 	"github.com/s-yakubovskiy/whereami/pkg/whereami"
@@ -15,8 +16,9 @@ var rootCmd = &cobra.Command{
 	Short: "WhereAmI is an application to find your geolocation based on your IP",
 	Long:  `WhereAmI is a CLI application that allows users to find their geolocation based on their public IP address.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		cfg := config.Cfg
 		client := apiclient.NewAPIClient()
-		dbcli, err := dbclient.NewSQLiteDB("~/work/common/whereami_locations.sqlite")
+		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to open database: %v\n", err)
 			os.Exit(1)
