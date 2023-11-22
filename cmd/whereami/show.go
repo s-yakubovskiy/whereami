@@ -8,6 +8,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/config"
 	"github.com/s-yakubovskiy/whereami/pkg/apiclient"
 	"github.com/s-yakubovskiy/whereami/pkg/dbclient"
+	"github.com/s-yakubovskiy/whereami/pkg/dumper"
 	"github.com/s-yakubovskiy/whereami/pkg/whereami"
 )
 
@@ -21,10 +22,11 @@ var showCmd = &cobra.Command{
 		cfg := config.Cfg
 		client := apiclient.NewAPIClient()
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
+		dumper, err := dumper.NewDumperJSON(dbcli)
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
-		locator := whereami.NewLocator(client, dbcli)
+		locator := whereami.NewLocator(client, dbcli, dumper)
 		if fullOutput {
 			locator.ShowFull()
 		} else {

@@ -7,6 +7,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/config"
 	"github.com/s-yakubovskiy/whereami/pkg/apiclient"
 	"github.com/s-yakubovskiy/whereami/pkg/dbclient"
+	"github.com/s-yakubovskiy/whereami/pkg/dumper"
 	"github.com/s-yakubovskiy/whereami/pkg/whereami"
 	"github.com/spf13/cobra"
 )
@@ -33,10 +34,11 @@ func startDaemon() {
 		_, err := c.AddFunc(taskCopy.Schedule, func() {
 			client := apiclient.NewAPIClient()
 			dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
+			dumper, err := dumper.NewDumperJSON(dbcli)
 			if err != nil {
 				log.Printf("Failed to open database: %v", err)
 			}
-			locator := whereami.NewLocator(client, dbcli)
+			locator := whereami.NewLocator(client, dbcli, dumper)
 			locator.Store()
 		})
 		if err != nil {

@@ -4,6 +4,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/pkg/apiclient"
 	"github.com/s-yakubovskiy/whereami/pkg/contracts"
 	"github.com/s-yakubovskiy/whereami/pkg/dbclient"
+	"github.com/s-yakubovskiy/whereami/pkg/dumper"
 )
 
 // var _ LocatorInterface = &Locator{}
@@ -24,9 +25,10 @@ type KeeperInterface interface {
 type Locator struct {
 	client   LocatorInterface
 	dbclient KeeperInterface
+	dumper   dumper.DumperJSON
 }
 
-func NewLocator(api *apiclient.APIClient, dbapi *dbclient.LocationKeeper) *Locator {
+func NewLocator(api *apiclient.APIClient, dbapi *dbclient.LocationKeeper, dumper *dumper.DumperJSON) *Locator {
 	return &Locator{
 		client:   api,
 		dbclient: dbapi,
