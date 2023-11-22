@@ -1,34 +1,31 @@
+// listvpn.go
 package main
 
 import (
 	"log"
 
-	"github.com/spf13/cobra"
-
 	"github.com/s-yakubovskiy/whereami/config"
-	"github.com/s-yakubovskiy/whereami/pkg/apiclient"
 	"github.com/s-yakubovskiy/whereami/pkg/dbclient"
 	"github.com/s-yakubovskiy/whereami/pkg/dumper"
-	"github.com/s-yakubovskiy/whereami/pkg/whereami"
+	"github.com/spf13/cobra"
 )
 
-var storeCmd = &cobra.Command{
-	Use:   "store",
-	Short: "Store WhereAmI application",
-	Long:  `This command store location information to datbase (sqlite)`,
+var importDumpCmd = &cobra.Command{
+	Use:   "import",
+	Short: "Import all locations from json to sqlite",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Cfg
-		client := apiclient.NewAPIClient()
+		importPath := args[0]
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 		dumper, err := dumper.NewDumperJSON(dbcli)
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
-		locator := whereami.NewLocator(client, dbcli, dumper)
-		locator.Store()
+		dumper.Import(importPath)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(storeCmd)
+	dumpCmd.AddCommand(importDumpCmd)
 }

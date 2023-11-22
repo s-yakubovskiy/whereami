@@ -4,6 +4,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/pkg/apiclient"
 	"github.com/s-yakubovskiy/whereami/pkg/contracts"
 	"github.com/s-yakubovskiy/whereami/pkg/dbclient"
+	"github.com/s-yakubovskiy/whereami/pkg/dumper"
 )
 
 // var _ LocatorInterface = &Locator{}
@@ -24,9 +25,10 @@ type KeeperInterface interface {
 type Locator struct {
 	client   LocatorInterface
 	dbclient KeeperInterface
+	dumper   dumper.DumperJSON
 }
 
-func NewLocator(api *apiclient.APIClient, dbapi *dbclient.LocationKeeper) *Locator {
+func NewLocator(api *apiclient.APIClient, dbapi *dbclient.LocationKeeper, dumper *dumper.DumperJSON) *Locator {
 	return &Locator{
 		client:   api,
 		dbclient: dbapi,
@@ -120,6 +122,19 @@ func (l *Locator) Store() {
 	location, err := l.client.GetLocation(ip)
 	if err != nil {
 		errorln(err.Error())
+	}
+
+	vpninterfaces, err := l.dbclient.GetVPNInterfaces()
+	if err != nil {
+		warnln(err.Error())
+	}
+
+	vpn, err := l.client.GetVPN(vpninterfaces)
+	if err != nil {
+		warnln(err.Error())
+	}
+	if vpn {
+		location.Vpn = true
 	}
 	if err := l.dbclient.StoreLocation(location); err != nil {
 		if err.Error() == "The database is already contains this record." {

@@ -1,5 +1,9 @@
 package dbclient
 
+import (
+	"log"
+)
+
 func (s *LocationKeeper) InitDB() error {
 	createTableSQL := `
     CREATE TABLE IF NOT EXISTS locations (
@@ -32,6 +36,20 @@ func (s *LocationKeeper) InitDB() error {
 		return err
 	}
 
+	// add vpn_interfaces table
+	if err := s.createVPNTable(); err != nil {
+		return err
+	}
+
+	// alter table with vpn column
+	if err := s.addVPNColumToTable(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *LocationKeeper) createVPNTable() error {
 	// vpn_interfaces table
 	createVPNInterfacesTableSQL := `
     CREATE TABLE IF NOT EXISTS vpn_interfaces (
@@ -40,8 +58,7 @@ func (s *LocationKeeper) InitDB() error {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );`
 
-	// ... existing code to prepare and execute statement ...
-	stmt, err = s.db.Prepare(createVPNInterfacesTableSQL)
+	stmt, err := s.db.Prepare(createVPNInterfacesTableSQL)
 	if err != nil {
 		return err
 	}
@@ -51,6 +68,21 @@ func (s *LocationKeeper) InitDB() error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
+// migration with add vpn column
+func (s *LocationKeeper) addVPNColumToTable() error {
+	if !s.columnExists("vpn") {
+		statement := `ALTER TABLE locations ADD COLUMN vpn INTEGER;`
+		_, err := s.db.Exec(statement)
+		if err != nil {
+			log.Printf("Error adding column 'vpn': %v", err)
+			return err
+		}
+		log.Println("Column 'vpn' added successfully.")
+	} else {
+		log.Println("Column 'vpn' already exists.")
+	}
 	return nil
 }
