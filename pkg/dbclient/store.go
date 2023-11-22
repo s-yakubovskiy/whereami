@@ -24,7 +24,7 @@ func (s *LocationKeeper) StoreLocation(location *contracts.Location) error {
 	stmt, err := s.db.Prepare(`
         INSERT INTO locations 
         (status, country, countryCode, region, regionName, city, zip, lat, lon, timezone, isp, org, asField, ip, date, vpn) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		return err
 	}

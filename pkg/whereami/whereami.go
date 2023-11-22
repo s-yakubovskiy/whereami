@@ -123,6 +123,19 @@ func (l *Locator) Store() {
 	if err != nil {
 		errorln(err.Error())
 	}
+
+	vpninterfaces, err := l.dbclient.GetVPNInterfaces()
+	if err != nil {
+		warnln(err.Error())
+	}
+
+	vpn, err := l.client.GetVPN(vpninterfaces)
+	if err != nil {
+		warnln(err.Error())
+	}
+	if vpn {
+		location.Vpn = true
+	}
 	if err := l.dbclient.StoreLocation(location); err != nil {
 		if err.Error() == "The database is already contains this record." {
 			warnln(err.Error())
