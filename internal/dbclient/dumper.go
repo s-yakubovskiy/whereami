@@ -3,7 +3,7 @@ package dbclient
 import (
 	"log"
 
-	"github.com/s-yakubovskiy/whereami/pkg/contracts"
+	"github.com/s-yakubovskiy/whereami/internal/contracts"
 )
 
 func (s *LocationKeeper) GetAllLocations() ([]contracts.Location, error) {

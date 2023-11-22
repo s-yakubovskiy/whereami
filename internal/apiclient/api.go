@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/s-yakubovskiy/whereami/pkg/contracts"
+	"github.com/s-yakubovskiy/whereami/internal/contracts"
 
 	"github.com/vishvananda/netlink"
 )

@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/s-yakubovskiy/whereami/pkg/contracts"
+	"github.com/s-yakubovskiy/whereami/internal/contracts"
 )
 
 type LocationData struct {

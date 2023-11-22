@@ -1,10 +1,10 @@
 package whereami
 
 import (
-	"github.com/s-yakubovskiy/whereami/pkg/apiclient"
-	"github.com/s-yakubovskiy/whereami/pkg/contracts"
-	"github.com/s-yakubovskiy/whereami/pkg/dbclient"
-	"github.com/s-yakubovskiy/whereami/pkg/dumper"
+	"github.com/s-yakubovskiy/whereami/internal/apiclient"
+	"github.com/s-yakubovskiy/whereami/internal/contracts"
+	"github.com/s-yakubovskiy/whereami/internal/dbclient"
+	"github.com/s-yakubovskiy/whereami/internal/dumper"
 )
 
 // var _ LocatorInterface = &Locator{}

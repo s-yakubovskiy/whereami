@@ -1,4 +1,7 @@
 log_level: debug
+api:
+  provider: ip-api.com
+  api_key: ""
 database:
   enabled: true
   type: sqlite

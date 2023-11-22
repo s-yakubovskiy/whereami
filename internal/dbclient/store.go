@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/s-yakubovskiy/whereami/pkg/contracts"
+	"github.com/s-yakubovskiy/whereami/internal/contracts"
 )
 
 func (s *LocationKeeper) StoreLocation(location *contracts.Location) error {

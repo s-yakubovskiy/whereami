@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"github.com/s-yakubovskiy/whereami/config"
-	"github.com/s-yakubovskiy/whereami/pkg/apiclient"
-	"github.com/s-yakubovskiy/whereami/pkg/dbclient"
-	"github.com/s-yakubovskiy/whereami/pkg/dumper"
-	"github.com/s-yakubovskiy/whereami/pkg/whereami"
+	"github.com/s-yakubovskiy/whereami/internal/apiclient"
+	"github.com/s-yakubovskiy/whereami/internal/dbclient"
+	"github.com/s-yakubovskiy/whereami/internal/dumper"
+	"github.com/s-yakubovskiy/whereami/internal/whereami"
 	"github.com/spf13/cobra"
 )
 

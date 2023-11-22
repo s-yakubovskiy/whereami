@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/s-yakubovskiy/whereami/config"
-	"github.com/s-yakubovskiy/whereami/pkg/dbclient"
-	"github.com/s-yakubovskiy/whereami/pkg/dumper"
+	"github.com/s-yakubovskiy/whereami/internal/dbclient"
+	"github.com/s-yakubovskiy/whereami/internal/dumper"
 	"github.com/spf13/cobra"
 )
 
