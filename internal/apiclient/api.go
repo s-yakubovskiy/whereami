@@ -16,13 +16,13 @@ const (
 	IP_LOCATION_ADDR = "http://ip-api.com/json/"
 )
 
-type APIClient struct{}
+type APIManager struct{}
 
-func NewAPIClient() *APIClient {
-	return &APIClient{}
+func NewAPIClient() *APIManager {
+	return &APIManager{}
 }
 
-func (l *APIClient) GetIP() (string, error) {
+func (l *APIManager) GetIP() (string, error) {
 	// // Fetching public IP address
 	resp, err := http.Get(IP_CONFIG_ADDR)
 	if err != nil {
@@ -36,7 +36,7 @@ func (l *APIClient) GetIP() (string, error) {
 	return string(ip), nil
 }
 
-func (l *APIClient) GetLocation(ip string) (*contracts.Location, error) {
+func (l *APIManager) GetLocation(ip string) (*contracts.Location, error) {
 	resp, err := http.Get(IP_LOCATION_ADDR + string(ip))
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func (l *APIClient) GetLocation(ip string) (*contracts.Location, error) {
 	return result, nil
 }
 
-func (l *APIClient) GetVPN(vpninterfaces []string) (bool, error) {
+func (l *APIManager) GetVPN(vpninterfaces []string) (bool, error) {
 	// Fetch all network interfaces
 	links, err := netlink.LinkList()
 	if err != nil {

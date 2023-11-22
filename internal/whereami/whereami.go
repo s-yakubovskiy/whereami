@@ -28,7 +28,7 @@ type Locator struct {
 	dumper   dumper.DumperJSON
 }
 
-func NewLocator(api *apiclient.APIClient, dbapi *dbclient.LocationKeeper, dumper *dumper.DumperJSON) *Locator {
+func NewLocator(api *apiclient.APIManager, dbapi *dbclient.LocationKeeper, dumper *dumper.DumperJSON) *Locator {
 	return &Locator{
 		client:   api,
 		dbclient: dbapi,
