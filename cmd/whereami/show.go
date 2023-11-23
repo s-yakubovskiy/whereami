@@ -6,13 +6,17 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/s-yakubovskiy/whereami/config"
-	"github.com/s-yakubovskiy/whereami/internal/apiclient"
+	"github.com/s-yakubovskiy/whereami/internal/apimanager"
 	"github.com/s-yakubovskiy/whereami/internal/dbclient"
 	"github.com/s-yakubovskiy/whereami/internal/dumper"
 	"github.com/s-yakubovskiy/whereami/internal/whereami"
+	"github.com/s-yakubovskiy/whereami/pkg/ipconfig"
 )
 
-var fullOutput bool
+var (
+	fullShow     bool
+	providerShow string
+)
 
 var showCmd = &cobra.Command{
 	Use:   "show",
@@ -20,14 +24,21 @@ var showCmd = &cobra.Command{
 	Long:  `This command Show current public ip address and fetching location information. Print to stdout`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Cfg
-		client := apiclient.NewAPIClient()
+		if providerShow != "" {
+			cfg.MainProvider = providerShow
+		}
+
+		ipconfig, err := ipconfig.NewIPConfig()
+		locationApi, err := getLocationClient(cfg.MainProvider)
+
+		client := apimanager.NewAPIManager(ipconfig, locationApi)
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 		dumper, err := dumper.NewDumperJSON(dbcli)
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
 		locator := whereami.NewLocator(client, dbcli, dumper)
-		if fullOutput {
+		if fullShow {
 			locator.ShowFull()
 		} else {
 			locator.Show()
@@ -36,6 +47,7 @@ var showCmd = &cobra.Command{
 }
 
 func init() {
-	showCmd.Flags().BoolVarP(&fullOutput, "full", "f", false, "Display full output")
+	showCmd.Flags().BoolVarP(&fullShow, "full", "f", false, "Display full output")
+	showCmd.Flags().StringVarP(&providerShow, "provider", "p", "", "Select ip location provider: [ipapi, ipdata]")
 	rootCmd.AddCommand(showCmd)
 }

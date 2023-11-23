@@ -1,56 +1,39 @@
-package apiclient
+package apimanager
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/s-yakubovskiy/whereami/internal/contracts"
+	"github.com/s-yakubovskiy/whereami/pkg/ipconfig"
 
 	"github.com/vishvananda/netlink"
 )
 
-const (
-	IP_CONFIG_ADDR   = "http://ifconfig.me"
-	IP_LOCATION_ADDR = "http://ip-api.com/json/"
-)
+type IPConfigInterface interface {
+	GetIP() (string, error)
+}
+type IPLocationInterface interface {
+	GetLocation(ip string) (*contracts.Location, error)
+}
 
-type APIManager struct{}
+type APIManager struct {
+	ipconfig IPConfigInterface
+	api      IPLocationInterface
+}
 
-func NewAPIClient() *APIManager {
-	return &APIManager{}
+func NewAPIManager(ip *ipconfig.IPConfig, api IPLocationInterface) *APIManager {
+	return &APIManager{
+		ipconfig: ip,
+		api:      api,
+	}
 }
 
 func (l *APIManager) GetIP() (string, error) {
-	// // Fetching public IP address
-	resp, err := http.Get(IP_CONFIG_ADDR)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	ip, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	return string(ip), nil
+	return l.ipconfig.GetIP()
 }
 
 func (l *APIManager) GetLocation(ip string) (*contracts.Location, error) {
-	resp, err := http.Get(IP_LOCATION_ADDR + string(ip))
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	jsonData, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var result *contracts.Location
-	json.Unmarshal([]byte(jsonData), &result)
-
-	return result, nil
+	return l.api.GetLocation(ip)
 }
 
 func (l *APIManager) GetVPN(vpninterfaces []string) (bool, error) {

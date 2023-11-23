@@ -5,10 +5,11 @@ import (
 
 	"github.com/robfig/cron/v3"
 	"github.com/s-yakubovskiy/whereami/config"
-	"github.com/s-yakubovskiy/whereami/internal/apiclient"
+	"github.com/s-yakubovskiy/whereami/internal/apimanager"
 	"github.com/s-yakubovskiy/whereami/internal/dbclient"
 	"github.com/s-yakubovskiy/whereami/internal/dumper"
 	"github.com/s-yakubovskiy/whereami/internal/whereami"
+	"github.com/s-yakubovskiy/whereami/pkg/ipconfig"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +33,9 @@ func startDaemon() {
 	for _, task := range cfg.CrontabTasks {
 		taskCopy := task // Create a copy of the task for the current iteration
 		_, err := c.AddFunc(taskCopy.Schedule, func() {
-			client := apiclient.NewAPIClient()
+			ipconfig, err := ipconfig.NewIPConfig()
+			locationApi, err := getLocationClient(cfg.MainProvider)
+			client := apimanager.NewAPIManager(ipconfig, locationApi)
 			dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 			dumper, err := dumper.NewDumperJSON(dbcli)
 			if err != nil {

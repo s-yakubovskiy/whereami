@@ -1,10 +1,19 @@
 log_level: debug
-api:
-  provider: ip-api.com
-  api_key: ""
+
+main_provider: "ipdata"
+
+provider_configs:
+  ipapi:
+    url: "http://ip-api.com/json/"
+    api_key: ""
+  ipdata:
+    url: "https://api.ipdata.co"
+    api_key: ""
+
 database:
   enabled: true
   type: sqlite
   path: ~/work/common/whereami_locations.sqlite
+
 crontab_tasks:
   - schedule: "@every 10s"

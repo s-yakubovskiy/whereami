@@ -1,7 +1,7 @@
 package whereami
 
 import (
-	"github.com/s-yakubovskiy/whereami/internal/apiclient"
+	"github.com/s-yakubovskiy/whereami/internal/apimanager"
 	"github.com/s-yakubovskiy/whereami/internal/contracts"
 	"github.com/s-yakubovskiy/whereami/internal/dbclient"
 	"github.com/s-yakubovskiy/whereami/internal/dumper"
@@ -10,9 +10,9 @@ import (
 // var _ LocatorInterface = &Locator{}
 
 type LocatorInterface interface {
-	GetIP() (string, error)
 	GetLocation(ip string) (*contracts.Location, error)
 	GetVPN([]string) (bool, error)
+	GetIP() (string, error)
 }
 
 // KeeperInterface defines the interface for database operations
@@ -28,7 +28,7 @@ type Locator struct {
 	dumper   dumper.DumperJSON
 }
 
-func NewLocator(api *apiclient.APIManager, dbapi *dbclient.LocationKeeper, dumper *dumper.DumperJSON) *Locator {
+func NewLocator(api *apimanager.APIManager, dbapi *dbclient.LocationKeeper, dumper *dumper.DumperJSON) *Locator {
 	return &Locator{
 		client:   api,
 		dbclient: dbapi,
@@ -36,15 +36,6 @@ func NewLocator(api *apiclient.APIManager, dbapi *dbclient.LocationKeeper, dumpe
 }
 
 func (l *Locator) Show() {
-	vpninterfaces, err := l.dbclient.GetVPNInterfaces()
-	if err != nil {
-		warnln(err.Error())
-	}
-
-	vpn, err := l.client.GetVPN(vpninterfaces)
-	if err != nil {
-		warnln(err.Error())
-	}
 	// Fetching data from IP API
 	ip, err := l.client.GetIP()
 	if err != nil {
@@ -54,32 +45,34 @@ func (l *Locator) Show() {
 	if err != nil {
 		errorln(err.Error())
 	}
+	if location != nil && ip != "" {
+		vpninterfaces, err := l.dbclient.GetVPNInterfaces()
+		if err != nil {
+			warnln(err.Error())
+		}
 
-	if vpn {
-		location.Vpn = true
+		vpn, err := l.client.GetVPN(vpninterfaces)
+		if err != nil {
+			warnln(err.Error())
+		}
+
+		if vpn {
+			location.Vpn = true
+		}
+
+		// output to stding colorized
+		location.Output(
+			"country",
+			"regionname",
+			"city",
+			"timezone",
+			"ip",
+			"vpn",
+		)
 	}
-
-	// output to stding colorized
-	location.Output(
-		"country",
-		"regionname",
-		"city",
-		"timezone",
-		"ip",
-		"vpn",
-	)
 }
 
 func (l *Locator) ShowFull() {
-	vpninterfaces, err := l.dbclient.GetVPNInterfaces()
-	if err != nil {
-		warnln(err.Error())
-	}
-
-	vpn, err := l.client.GetVPN(vpninterfaces)
-	if err != nil {
-		warnln(err.Error())
-	}
 	// Fetching data from IP API
 	ip, err := l.client.GetIP()
 	if err != nil {
@@ -89,29 +82,40 @@ func (l *Locator) ShowFull() {
 	if err != nil {
 		errorln(err.Error())
 	}
+	if location != nil && ip != "" {
+		vpninterfaces, err := l.dbclient.GetVPNInterfaces()
+		if err != nil {
+			warnln(err.Error())
+		}
 
-	if vpn {
-		location.Vpn = true
+		vpn, err := l.client.GetVPN(vpninterfaces)
+		if err != nil {
+			warnln(err.Error())
+		}
+
+		if vpn {
+			location.Vpn = true
+		}
+
+		// output to stding colorized
+		location.Output(
+			"status",
+			"country",
+			"countrycode",
+			"region",
+			"regionname",
+			"zip",
+			"city",
+			"lat",
+			"lon",
+			"timezone",
+			"isp",
+			"org",
+			"as",
+			"ip",
+			"vpn",
+		)
 	}
-
-	// output to stding colorized
-	location.Output(
-		"status",
-		"country",
-		"countrycode",
-		"region",
-		"regionname",
-		"zip",
-		"city",
-		"lat",
-		"lon",
-		"timezone",
-		"isp",
-		"org",
-		"as",
-		"ip",
-		"vpn",
-	)
 }
 
 func (l *Locator) Store() {
@@ -124,23 +128,25 @@ func (l *Locator) Store() {
 		errorln(err.Error())
 	}
 
-	vpninterfaces, err := l.dbclient.GetVPNInterfaces()
-	if err != nil {
-		warnln(err.Error())
-	}
-
-	vpn, err := l.client.GetVPN(vpninterfaces)
-	if err != nil {
-		warnln(err.Error())
-	}
-	if vpn {
-		location.Vpn = true
-	}
-	if err := l.dbclient.StoreLocation(location); err != nil {
-		if err.Error() == "The database is already contains this record." {
+	if location != nil && ip != "" {
+		vpninterfaces, err := l.dbclient.GetVPNInterfaces()
+		if err != nil {
 			warnln(err.Error())
-		} else {
-			errorln(err.Error())
+		}
+
+		vpn, err := l.client.GetVPN(vpninterfaces)
+		if err != nil {
+			warnln(err.Error())
+		}
+		if vpn {
+			location.Vpn = true
+		}
+		if err := l.dbclient.StoreLocation(location); err != nil {
+			if err.Error() == "The database is already contains this record." {
+				warnln(err.Error())
+			} else {
+				errorln(err.Error())
+			}
 		}
 	}
 }

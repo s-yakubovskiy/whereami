@@ -6,10 +6,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/s-yakubovskiy/whereami/config"
-	"github.com/s-yakubovskiy/whereami/internal/apiclient"
+	"github.com/s-yakubovskiy/whereami/internal/apimanager"
 	"github.com/s-yakubovskiy/whereami/internal/dbclient"
 	"github.com/s-yakubovskiy/whereami/internal/dumper"
 	"github.com/s-yakubovskiy/whereami/internal/whereami"
+	"github.com/s-yakubovskiy/whereami/pkg/ipconfig"
 )
 
 var storeCmd = &cobra.Command{
@@ -18,7 +19,9 @@ var storeCmd = &cobra.Command{
 	Long:  `This command store location information to datbase (sqlite)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Cfg
-		client := apiclient.NewAPIClient()
+		ipconfig, err := ipconfig.NewIPConfig()
+		locationApi, err := getLocationClient(cfg.MainProvider)
+		client := apimanager.NewAPIManager(ipconfig, locationApi)
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 		dumper, err := dumper.NewDumperJSON(dbcli)
 		if err != nil {
