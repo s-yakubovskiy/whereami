@@ -5,10 +5,11 @@ import (
 
 	"github.com/robfig/cron/v3"
 	"github.com/s-yakubovskiy/whereami/config"
-	"github.com/s-yakubovskiy/whereami/pkg/apiclient"
-	"github.com/s-yakubovskiy/whereami/pkg/dbclient"
-	"github.com/s-yakubovskiy/whereami/pkg/dumper"
-	"github.com/s-yakubovskiy/whereami/pkg/whereami"
+	"github.com/s-yakubovskiy/whereami/internal/apimanager"
+	"github.com/s-yakubovskiy/whereami/internal/dbclient"
+	"github.com/s-yakubovskiy/whereami/internal/dumper"
+	"github.com/s-yakubovskiy/whereami/internal/whereami"
+	"github.com/s-yakubovskiy/whereami/pkg/ipconfig"
 	"github.com/spf13/cobra"
 )
 
@@ -32,13 +33,15 @@ func startDaemon() {
 	for _, task := range cfg.CrontabTasks {
 		taskCopy := task // Create a copy of the task for the current iteration
 		_, err := c.AddFunc(taskCopy.Schedule, func() {
-			client := apiclient.NewAPIClient()
+			ipconfig, err := ipconfig.NewIPConfig()
+			primary, secondary, ipquality, err := getLocationClient(cfg.MainProvider)
+			client := apimanager.NewAPIManager(ipconfig, primary, secondary, ipquality)
 			dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 			dumper, err := dumper.NewDumperJSON(dbcli)
 			if err != nil {
 				log.Printf("Failed to open database: %v", err)
 			}
-			locator := whereami.NewLocator(client, dbcli, dumper)
+			locator := whereami.NewLocator(client, dbcli, dumper, cfg.ProviderConfigs.IpQualityScore.Enabled)
 			locator.Store()
 		})
 		if err != nil {

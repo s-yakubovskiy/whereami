@@ -2,47 +2,20 @@ package dbclient
 
 import (
 	"log"
+
+	"github.com/pressly/goose"
 )
 
 func (s *LocationKeeper) InitDB() error {
-	createTableSQL := `
-    CREATE TABLE IF NOT EXISTS locations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        status TEXT,
-        country TEXT,
-        countryCode TEXT,
-        region TEXT,
-        regionName TEXT,
-        city TEXT,
-        zip TEXT,
-        lat REAL,
-        lon REAL,
-        timezone TEXT,
-        isp TEXT,
-        org TEXT,
-        asField TEXT,
-        ip TEXT,
-        date TEXT
-    );`
-
-	stmt, err := s.db.Prepare(createTableSQL)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec()
+	// Run migrations using Goose
+	err := goose.SetDialect("sqlite3")
 	if err != nil {
 		return err
 	}
 
-	// add vpn_interfaces table
-	if err := s.createVPNTable(); err != nil {
-		return err
-	}
-
-	// alter table with vpn column
-	if err := s.addVPNColumToTable(); err != nil {
+	err = goose.Up(s.db, "db/migrations")
+	if err != nil {
+		log.Printf("Goose migration failed: %v", err)
 		return err
 	}
 

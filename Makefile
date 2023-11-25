@@ -23,7 +23,8 @@ endif
 .PHONY: build
 # build
 build:
-	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+	@mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+
 
 .PHONY: lint
 # lint
@@ -33,12 +34,19 @@ lint:
 .PHONY: install
 # install
 install: build
+	@sudo systemctl stop whereami.service
 	@cp ./bin/whereami ~/.local/bin/whereami
+	@cp ./config/config.yaml ~/.config/whereami/
+	@sudo systemctl daemon-reload
+	@sudo systemctl start whereami.service
 
 run: build
 	@export $(shell sed 's/=.*//' ./.env) && \
 	source ./.env && \
-	./bin/ephemeral-env
+	./bin/whereami  $(filter-out $@,$(MAKECMDGOALS))
+
+%:
+	@:
 
 help:
 	@echo ''
