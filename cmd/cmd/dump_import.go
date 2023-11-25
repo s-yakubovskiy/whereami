@@ -1,5 +1,5 @@
 // listvpn.go
-package main
+package cmd
 
 import (
 	"log"
@@ -10,22 +10,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var exportDumpCmd = &cobra.Command{
-	Use:   "export",
-	Short: "Export all locations to json",
+var importDumpCmd = &cobra.Command{
+	Use:   "import",
+	Short: "Import all locations from json to sqlite",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Cfg
-		exportPath := args[0]
+		importPath := args[0]
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 		dumper, err := dumper.NewDumperJSON(dbcli)
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
-		dumper.Export(exportPath)
+		dumper.Import(importPath)
 	},
 }
 
 func init() {
-	dumpCmd.AddCommand(exportDumpCmd) // Add to the vpn parent command
+	dumpCmd.AddCommand(importDumpCmd)
 }

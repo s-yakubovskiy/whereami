@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/s-yakubovskiy/whereami/cmd/cmd"
 	"github.com/s-yakubovskiy/whereami/config"
 )
 
@@ -11,5 +12,5 @@ func init() {
 }
 
 func main() {
-	Execute()
+	cmd.Execute()
 }

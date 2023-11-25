@@ -1,24 +1,26 @@
 package whereami
 
+import "github.com/s-yakubovskiy/whereami/internal/common"
+
 func (l *Locator) Store() {
 	ip, err := l.client.GetIP()
 	if err != nil {
-		errorln(err.Error())
+		common.Errorln(err.Error())
 	}
 	location, err := l.client.GetLocation(ip)
 	if err != nil {
-		errorln(err.Error())
+		common.Errorln(err.Error())
 	}
 
 	if location != nil && ip != "" {
 		vpninterfaces, err := l.dbclient.GetVPNInterfaces()
 		if err != nil {
-			warnln(err.Error())
+			common.Warnln(err.Error())
 		}
 
 		vpn, err := l.client.GetVPN(vpninterfaces)
 		if err != nil {
-			warnln(err.Error())
+			common.Warnln(err.Error())
 		}
 		if vpn {
 			location.Vpn = true
@@ -28,9 +30,9 @@ func (l *Locator) Store() {
 		}
 		if err := l.dbclient.StoreLocation(location); err != nil {
 			if err.Error() == "The database is already contains this record." {
-				warnln(err.Error())
+				common.Warnln(err.Error())
 			} else {
-				errorln(err.Error())
+				common.Errorln(err.Error())
 			}
 		}
 	}

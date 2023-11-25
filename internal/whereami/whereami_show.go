@@ -1,24 +1,26 @@
 package whereami
 
+import "github.com/s-yakubovskiy/whereami/internal/common"
+
 func (l *Locator) Show() {
 	// Fetching data from IP API
 	ip, err := l.client.GetIP()
 	if err != nil {
-		errorln(err.Error())
+		common.Errorln(err.Error())
 	}
 	location, err := l.client.GetLocation(ip)
 	if err != nil {
-		errorln(err.Error())
+		common.Errorln(err.Error())
 	}
 	if location != nil && ip != "" {
 		vpninterfaces, err := l.dbclient.GetVPNInterfaces()
 		if err != nil {
-			warnln(err.Error())
+			common.Warnln(err.Error())
 		}
 
 		vpn, err := l.client.GetVPN(vpninterfaces)
 		if err != nil {
-			warnln(err.Error())
+			common.Warnln(err.Error())
 		}
 
 		if vpn {
@@ -47,21 +49,21 @@ func (l *Locator) ShowFull() {
 	// Fetching data from IP API
 	ip, err := l.client.GetIP()
 	if err != nil {
-		errorln(err.Error())
+		common.Errorln(err.Error())
 	}
 	location, err := l.client.GetLocation(ip)
 	if err != nil {
-		errorln(err.Error())
+		common.Errorln(err.Error())
 	}
 	if location != nil && ip != "" {
 		vpninterfaces, err := l.dbclient.GetVPNInterfaces()
 		if err != nil {
-			warnln(err.Error())
+			common.Warnln(err.Error())
 		}
 
 		vpn, err := l.client.GetVPN(vpninterfaces)
 		if err != nil {
-			warnln(err.Error())
+			common.Warnln(err.Error())
 		}
 
 		if vpn {

@@ -1,7 +1,9 @@
 package common
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 )
@@ -33,4 +35,32 @@ func printStruct(s interface{}) {
 		value := val.Field(i)
 		fmt.Printf("%s: %v\n", field.Name, value.Interface())
 	}
+}
+
+func println(message, color string) {
+	fmt.Println(color + message + C_RESET)
+}
+
+func Errorln(message string) {
+	println(message, C_RED)
+}
+
+func Warnln(message string) {
+	println(message, C_YELLOW)
+}
+
+func Successln(message string) {
+	println(message, C_GREEN)
+}
+
+func Infoln(message string) {
+	println(message, C_BLUE)
+}
+
+func PrettyPrint(v interface{}) string {
+	prettyData, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		log.Println("Failed to generate JSON", err)
+	}
+	return string(prettyData)
 }
