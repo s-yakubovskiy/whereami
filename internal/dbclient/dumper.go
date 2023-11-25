@@ -7,7 +7,12 @@ import (
 )
 
 func (s *LocationKeeper) GetAllLocations() ([]contracts.Location, error) {
-	rows, err := s.db.Query(`SELECT ip, country, countryCode, region, regionCode, city, timezone, zip, flag, emojiFlag, isp, org, asn, latitude, longitude, date, vpn FROM locations`)
+	query := `SELECT l.ip, l.country, l.countryCode, l.region, l.regionCode, l.city, l.timezone, l.zip, l.flag, l.isp, l.asn, l.latitude, l.longitude, l.date, l.vpn,
+                     s.fraud_score, s.host, s.proxy, s.vpn, s.tor, s.is_crawler, s.recent_abuse, s.bot_status
+              FROM locations l
+              LEFT JOIN location_scores s ON l.id = s.location_id`
+
+	rows, err := s.db.Query(query)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -16,7 +21,9 @@ func (s *LocationKeeper) GetAllLocations() ([]contracts.Location, error) {
 	var locations []contracts.Location
 	for rows.Next() {
 		var loc contracts.Location
-		err = rows.Scan(&loc.IP, &loc.Country, &loc.CountryCode, &loc.Region, &loc.RegionCode, &loc.City, &loc.Timezone, &loc.Zip, &loc.Flag, &loc.EmojiFlag, &loc.Isp, &loc.Org, &loc.Asn, &loc.Latitude, &loc.Longitude, &loc.Date, &loc.Vpn)
+		// Update the Scan method to include new fields
+		err = rows.Scan(&loc.IP, &loc.Country, &loc.CountryCode, &loc.Region, &loc.RegionCode, &loc.City, &loc.Timezone, &loc.Zip, &loc.Flag, &loc.Isp, &loc.Asn, &loc.Latitude, &loc.Longitude, &loc.Date, &loc.Vpn,
+			&loc.Scores.FraudScore, &loc.Scores.Host, &loc.Scores.Proxy, &loc.Scores.VPN, &loc.Scores.Tor, &loc.Scores.IsCrawler, &loc.Scores.RecentAbuse, &loc.Scores.BotStatus)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -27,14 +34,40 @@ func (s *LocationKeeper) GetAllLocations() ([]contracts.Location, error) {
 
 func (s *LocationKeeper) ImportLocations(locations []contracts.Location) error {
 	for _, location := range locations {
-		log.Fatalf("%+v\n", location)
-		_, err := s.db.Exec(`INSERT INTO locations (ip, country, countryCode, region, regionCode, city, timezone, zip, flag, emojiFlag, isp, org, asn, latitude, longitude, date, vpn) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			location.IP, location.Country, location.CountryCode, location.Region, location.RegionCode, location.City, location.Timezone, location.Zip, location.Flag, location.EmojiFlag, location.Isp, location.Org, location.Asn, location.Latitude, location.Longitude, location.Date, location.Vpn)
+		tx, err := s.db.Begin()
 		if err != nil {
-			log.Println("Failed to insert:", err)
+			log.Fatal(err)
+		}
+
+		// Insert into locations table
+		res, err := tx.Exec(`INSERT INTO locations (ip, country, countryCode, region, regionCode, city, timezone, zip, flag, isp, asn, latitude, longitude, date, vpn) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			location.IP, location.Country, location.CountryCode, location.Region, location.RegionCode, location.City, location.Timezone, location.Zip, location.Flag, location.Isp, location.Asn, location.Latitude, location.Longitude, location.Date, location.Vpn)
+		if err != nil {
+			tx.Rollback()
+			log.Println("Failed to insert into locations:", err)
+			continue
+		}
+
+		// Get last insert ID
+		lastID, err := res.LastInsertId()
+		if err != nil {
+			tx.Rollback()
+			log.Fatal(err)
+		}
+
+		// Insert into location_scores table
+		_, err = tx.Exec(`INSERT INTO location_scores (location_id, fraud_score, host, proxy, vpn, tor, is_crawler, recent_abuse, bot_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			lastID, location.Scores.FraudScore, location.Scores.Host, location.Scores.Proxy, location.Scores.VPN, location.Scores.Tor, location.Scores.IsCrawler, location.Scores.RecentAbuse, location.Scores.BotStatus)
+		if err != nil {
+			tx.Rollback()
+			log.Println("Failed to insert into location_scores:", err)
+			continue
+		}
+
+		err = tx.Commit()
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
 	return nil
 }
-
-// ip, country, countryCode, region, regionCode, city, timezone, zip, postal, flag, emojiFlag, isp, org, asn, latitude, longitude, date, vpn

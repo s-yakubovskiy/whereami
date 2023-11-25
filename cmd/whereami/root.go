@@ -10,24 +10,31 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/dbclient"
 	"github.com/s-yakubovskiy/whereami/internal/dumper"
 	"github.com/s-yakubovskiy/whereami/internal/whereami"
-	"github.com/s-yakubovskiy/whereami/pkg/ipapi"
 	"github.com/s-yakubovskiy/whereami/pkg/ipconfig"
-	"github.com/s-yakubovskiy/whereami/pkg/ipdataclient"
 	"github.com/spf13/cobra"
 )
 
-func getLocationClient(provider string) (apimanager.IPLocationInterface, error) {
+func getLocationClient(provider string) (apimanager.IPLocationInterface, apimanager.IPLocationInterface, apimanager.IPQualityInterface, error) {
 	switch provider {
 	case "ipapi":
-		c := config.Cfg.ProviderConfigs.IpApi
-		return ipapi.NewIpApiClient(c)
+		primary, err := apimanager.NewIpApiClient(config.Cfg.ProviderConfigs.IpApi)
+		secondary, err := apimanager.NewIpDataClient(config.Cfg.ProviderConfigs.IpData)
+		if config.Cfg.ProviderConfigs.IpQualityScore.Enabled {
+			ipquality, err := apimanager.NewIpQualityScoreClient(config.Cfg.ProviderConfigs.IpQualityScore)
+			return primary, secondary, ipquality, err
+		}
+		return primary, secondary, nil, err
 	case "ipdata":
-		// NOTE: change to correct config
-		c := config.Cfg.ProviderConfigs.IpData
-		return ipdataclient.NewIPDataClient(c)
+		primary, err := apimanager.NewIpDataClient(config.Cfg.ProviderConfigs.IpData)
+		secondary, err := apimanager.NewIpApiClient(config.Cfg.ProviderConfigs.IpApi)
+		if config.Cfg.ProviderConfigs.IpQualityScore.Enabled {
+			ipquality, err := apimanager.NewIpQualityScoreClient(config.Cfg.ProviderConfigs.IpQualityScore)
+			return primary, secondary, ipquality, err
+		}
+		return primary, secondary, nil, err
 	default:
 		log.Fatalf("Unknown provider set: %+v\n", provider)
-		return nil, fmt.Errorf("unknown provider: %s", provider)
+		return nil, nil, nil, fmt.Errorf("unknown provider: %s", provider)
 	}
 }
 
@@ -39,16 +46,16 @@ var rootCmd = &cobra.Command{
 		cfg := config.Cfg
 
 		ipconfig, err := ipconfig.NewIPConfig()
-		locationApi, err := getLocationClient(cfg.MainProvider)
+		primary, secondary, ipquality, err := getLocationClient(cfg.MainProvider)
 
-		client := apimanager.NewAPIManager(ipconfig, locationApi)
+		client := apimanager.NewAPIManager(ipconfig, primary, secondary, ipquality)
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 		dumper, err := dumper.NewDumperJSON(dbcli)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to open database: %v\n", err)
 			os.Exit(1)
 		}
-		locator := whereami.NewLocator(client, dbcli, dumper)
+		locator := whereami.NewLocator(client, dbcli, dumper, cfg.ProviderConfigs.IpQualityScore.Enabled)
 		locator.Show()
 	},
 }

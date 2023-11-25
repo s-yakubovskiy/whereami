@@ -21,13 +21,15 @@ type Database struct {
 }
 
 type ProviderConfigs struct {
-	IpApi  ProviderConfig `mapstructure:"ipapi"`
-	IpData ProviderConfig `mapstructure:"ipdata"`
+	IpApi          ProviderConfig `mapstructure:"ipapi"`
+	IpData         ProviderConfig `mapstructure:"ipdata"`
+	IpQualityScore ProviderConfig `mapstructure:"ipqualityscore"`
 }
 
 type ProviderConfig struct {
-	URL    string `mapstructure:"url"`
-	APIKey string `mapstructure:"api_key"`
+	URL     string `mapstructure:"url"`
+	APIKey  string `mapstructure:"api_key"`
+	Enabled bool   `mapstructure:"enabled"`
 }
 
 type CrontabTask struct {

@@ -4,12 +4,9 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-
-	"github.com/s-yakubovskiy/whereami/config"
-	"github.com/s-yakubovskiy/whereami/internal/contracts"
 )
 
-type IpApiClient struct {
+type IpApi struct {
 	url     string
 	api_key string
 }
@@ -31,14 +28,14 @@ type IpApiLocation struct {
 	Query       string  `json:"query"`
 }
 
-func NewIpApiClient(providerConfig config.ProviderConfig) (*IpApiClient, error) {
-	return &IpApiClient{
-		url:     providerConfig.URL,
-		api_key: providerConfig.APIKey,
+func NewIpApi(url, apikey string) (*IpApi, error) {
+	return &IpApi{
+		url:     url,
+		api_key: apikey,
 	}, nil
 }
 
-func (l *IpApiClient) GetLocation(ip string) (*contracts.Location, error) {
+func (l *IpApi) Lookup(ip string) (*IpApiLocation, error) {
 	resp, err := http.Get(l.url + string(ip))
 	if err != nil {
 		return nil, err
@@ -51,6 +48,5 @@ func (l *IpApiClient) GetLocation(ip string) (*contracts.Location, error) {
 
 	var result *IpApiLocation
 	json.Unmarshal([]byte(jsonData), &result)
-
-	return ConvertIpApiToLocation(result)
+	return result, err
 }

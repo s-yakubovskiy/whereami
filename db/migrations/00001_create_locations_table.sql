@@ -10,14 +10,13 @@ CREATE TABLE IF NOT EXISTS locations (
     timezone TEXT,
     zip TEXT,
     flag TEXT,
-    emojiFlag TEXT,
     isp TEXT,
-    org TEXT,
     asn TEXT,
     latitude REAL,
     longitude REAL,
     date TEXT,
-    vpn INTEGER
+    vpn INTEGER,
+    comment TEXT
 );
 
 -- +goose Down

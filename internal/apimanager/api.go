@@ -17,14 +17,18 @@ type IPLocationInterface interface {
 }
 
 type APIManager struct {
-	ipconfig IPConfigInterface
-	api      IPLocationInterface
+	ipconfig  IPConfigInterface
+	primary   IPLocationInterface
+	secondary IPLocationInterface
+	ipquality IPQualityInterface
 }
 
-func NewAPIManager(ip *ipconfig.IPConfig, api IPLocationInterface) *APIManager {
+func NewAPIManager(ip *ipconfig.IPConfig, primary, secondary IPLocationInterface, ipquality IPQualityInterface) *APIManager {
 	return &APIManager{
-		ipconfig: ip,
-		api:      api,
+		ipconfig:  ip,
+		primary:   primary,
+		secondary: secondary,
+		ipquality: ipquality,
 	}
 }
 
@@ -33,7 +37,12 @@ func (l *APIManager) GetIP() (string, error) {
 }
 
 func (l *APIManager) GetLocation(ip string) (*contracts.Location, error) {
-	return l.api.GetLocation(ip)
+	location, err := l.primary.GetLocation(ip)
+	if err != nil && l.secondary != nil {
+		// NOTE: If the primary client fails, try the secondary client
+		return l.secondary.GetLocation(ip)
+	}
+	return location, err
 }
 
 func (l *APIManager) GetVPN(vpninterfaces []string) (bool, error) {
@@ -57,4 +66,8 @@ func (l *APIManager) GetVPN(vpninterfaces []string) (bool, error) {
 	}
 
 	return false, nil // No VPN interface found in the system's network interfaces
+}
+
+func (l *APIManager) AddIPQuality(location *contracts.Location, ip string) (*contracts.Location, error) {
+	return l.ipquality.AddIPQuality(location, ip)
 }

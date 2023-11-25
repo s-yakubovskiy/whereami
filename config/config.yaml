@@ -6,14 +6,20 @@ provider_configs:
   ipapi:
     url: "http://ip-api.com/json/"
     api_key: ""
+    enabled: true
   ipdata:
     url: "https://api.ipdata.co"
     api_key: ""
+    enabled: true
+  ipqualityscore:
+    url: "https://ipqualityscore.com/api/json/ip"
+    api_key: ""
+    enabled: true
 
 database:
   enabled: true
   type: sqlite
-  path: ~/work/common/whereami_locations.sqlite
+  path: ~/work/common/whereami/whereami_db.sqlite
 
 crontab_tasks:
   - schedule: "@every 3h"

@@ -23,14 +23,15 @@ var storeCmd = &cobra.Command{
 			cfg.MainProvider = providerShow
 		}
 		ipconfig, err := ipconfig.NewIPConfig()
-		locationApi, err := getLocationClient(cfg.MainProvider)
-		client := apimanager.NewAPIManager(ipconfig, locationApi)
+		primary, secondary, ipquality, err := getLocationClient(cfg.MainProvider)
+
+		client := apimanager.NewAPIManager(ipconfig, primary, secondary, ipquality)
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 		dumper, err := dumper.NewDumperJSON(dbcli)
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
-		locator := whereami.NewLocator(client, dbcli, dumper)
+		locator := whereami.NewLocator(client, dbcli, dumper, cfg.ProviderConfigs.IpQualityScore.Enabled)
 		locator.Store()
 	},
 }
