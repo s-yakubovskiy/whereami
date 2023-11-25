@@ -23,16 +23,14 @@ func (s *LocationKeeper) StoreLocation(location *contracts.Location) error {
 	// Insert the new location
 	stmt, err := s.db.Prepare(`
         INSERT INTO locations 
-        (status, country, countryCode, region, regionName, city, zip, lat, lon, timezone, isp, org, asField, ip, date, vpn) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+				(ip, country, countryCode, region, regionCode, city, timezone, zip, flag, emojiFlag, isp, org, asn, latitude, longitude, date, vpn)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(location.Status, location.Country, location.CountryCode, location.Region,
-		location.RegionName, location.City, location.Zip, location.Lat, location.Lon,
-		location.Timezone, location.Isp, location.Org, location.As, location.IP, location.Date, location.Vpn)
+	_, err = stmt.Exec(location.IP, location.Country, location.CountryCode, location.Region, location.RegionCode, location.City, location.Timezone, location.Zip, location.Flag, location.EmojiFlag, location.Isp, location.Org, location.Asn, location.Latitude, location.Longitude, location.Date, location.Vpn)
 	if err != nil {
 		return err
 	}

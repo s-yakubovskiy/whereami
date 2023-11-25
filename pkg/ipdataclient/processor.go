@@ -8,27 +8,27 @@ import (
 )
 
 // NOTE: put dto processing logic here
-func (l *IPDataClient) ConvertIPToLocation(ip ipdata.IP) (*contracts.Location, error) {
+func ConvertIPToLocation(ip ipdata.IP) (*contracts.Location, error) {
 	// Check for nil pointers in fields that are pointers in the source struct
 	if ip.TimeZone == nil {
 		return nil, fmt.Errorf("missing required fields in IP data")
 	}
 	return &contracts.Location{
-		Status:      "success",
+		IP:          ip.IP,
 		Country:     ip.CountryName,
 		CountryCode: ip.CountryCode,
-		Region:      ip.RegionCode,
-		RegionName:  ip.Region,
+		Region:      ip.Region,
+		RegionCode:  ip.RegionCode,
 		City:        ip.City,
-		Zip:         ip.Postal,
-		Lat:         ip.Latitude,
-		Lon:         ip.Longitude,
 		Timezone:    ip.TimeZone.Name,
-		Isp:         ip.ASN.Name, // Assuming ASN Name represents the ISP
-		Org:         ip.Organization,
-		As:          ip.ASN.ASN, // Using ASN as the 'as' field
-		IP:          ip.IP,
-		Date:        "", // Set this to current date or as required
-		Vpn:         false,
+		Zip:         ip.Postal,
+		Flag:        ip.EmojiFlag,
+		// EmojiFlag:   ip.EmojiFlag,
+		Isp:       ip.Flag, // Assuming ASN Name represents the ISP
+		Org:       ip.Organization,
+		Latitude:  ip.Latitude,
+		Longitude: ip.Longitude,
+		Date:      "", // Set this to current date or as required
+		Vpn:       false,
 	}, nil
 }

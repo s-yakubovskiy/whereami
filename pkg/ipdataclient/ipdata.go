@@ -30,7 +30,7 @@ func (l *IPDataClient) GetLocation(ip string) (*contracts.Location, error) {
 	if err != nil {
 		return nil, err
 	}
-	return l.ConvertIPToLocation(data)
+	return ConvertIPToLocation(data)
 }
 
 func printStruct(s interface{}) {

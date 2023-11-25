@@ -63,7 +63,7 @@ func (l *Locator) Show() {
 		// output to stding colorized
 		location.Output(
 			"country",
-			"regionname",
+			"region",
 			"city",
 			"timezone",
 			"ip",
@@ -99,21 +99,9 @@ func (l *Locator) ShowFull() {
 
 		// output to stding colorized
 		location.Output(
-			"status",
-			"country",
-			"countrycode",
-			"region",
-			"regionname",
-			"zip",
-			"city",
-			"lat",
-			"lon",
-			"timezone",
-			"isp",
-			"org",
-			"as",
-			"ip",
-			"vpn",
+			"ip", "country", "countryCode", "region", "regionCode",
+			"city", "timezone", "zip", "flag",
+			"isp", "org", "asn", "latitude", "longitude", "vpn",
 		)
 	}
 }

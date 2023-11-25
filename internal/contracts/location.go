@@ -9,20 +9,22 @@ import (
 )
 
 type Location struct {
-	Status      string  `json:"status"`
+	IP          string  `json:"ip"`
 	Country     string  `json:"country"`
-	CountryCode string  `json:"countryCode"`
+	CountryCode string  `json:"country_code"`
 	Region      string  `json:"region"`
-	RegionName  string  `json:"regionName"`
+	RegionCode  string  `json:"region_code"`
 	City        string  `json:"city"`
-	Zip         string  `json:"zip"`
-	Lat         float64 `json:"lat"`
-	Lon         float64 `json:"lon"`
 	Timezone    string  `json:"timezone"`
+	Zip         string  `json:"zip"`
+	Postal      string  `json:"postal"`
+	Flag        string  `json:"flag"`
+	EmojiFlag   string  `json:"emoji_flag"`
 	Isp         string  `json:"isp"`
 	Org         string  `json:"org"`
-	As          string  `json:"as"`
-	IP          string  `json:"query"`
+	Asn         string  `json:"asn"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
 	Date        string  `json:"date"`
 	Vpn         bool    `json:"vpn"`
 }

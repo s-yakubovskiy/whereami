@@ -16,4 +16,4 @@ database:
   path: ~/work/common/whereami_locations.sqlite
 
 crontab_tasks:
-  - schedule: "@every 10s"
+  - schedule: "@every 3h"

@@ -25,12 +25,10 @@ type IpApiLocation struct {
 	Lat         float64 `json:"lat"`
 	Lon         float64 `json:"lon"`
 	Timezone    string  `json:"timezone"`
-	Isp         string  `json:"isp"`
+	ISP         string  `json:"isp"`
 	Org         string  `json:"org"`
-	As          string  `json:"as"`
-	IP          string  `json:"query"`
-	Date        string  `json:"date"`
-	Vpn         bool    `json:"vpn"`
+	AS          string  `json:"as"`
+	Query       string  `json:"query"`
 }
 
 func NewIpApiClient(providerConfig config.ProviderConfig) (*IpApiClient, error) {
@@ -51,8 +49,8 @@ func (l *IpApiClient) GetLocation(ip string) (*contracts.Location, error) {
 		return nil, err
 	}
 
-	var result *contracts.Location
+	var result *IpApiLocation
 	json.Unmarshal([]byte(jsonData), &result)
 
-	return result, nil
+	return ConvertIpApiToLocation(result)
 }

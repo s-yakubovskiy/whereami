@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
@@ -83,6 +84,12 @@ func (loader *Loader) decorateViper(v *viper.Viper) {
 }
 
 func (loader *Loader) Load(appConfig *AppConfig) *AppConfig {
+	_ = godotenv.Load()
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Printf("Error loading .env file: %v\n", err)
+	// }
+
 	v := viper.New()
 	loader.decorateViper(v)
 	v.SetConfigName("config")                  // Name of config file (without extension)

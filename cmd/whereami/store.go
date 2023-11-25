@@ -19,6 +19,9 @@ var storeCmd = &cobra.Command{
 	Long:  `This command store location information to datbase (sqlite)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Cfg
+		if providerShow != "" {
+			cfg.MainProvider = providerShow
+		}
 		ipconfig, err := ipconfig.NewIPConfig()
 		locationApi, err := getLocationClient(cfg.MainProvider)
 		client := apimanager.NewAPIManager(ipconfig, locationApi)
@@ -33,5 +36,6 @@ var storeCmd = &cobra.Command{
 }
 
 func init() {
+	storeCmd.Flags().StringVarP(&providerShow, "provider", "p", "", "Select ip location provider: [ipapi, ipdata]")
 	rootCmd.AddCommand(storeCmd)
 }
