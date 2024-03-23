@@ -1,9 +1,7 @@
 package contracts
 
 import (
-	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/fatih/color"
 )
@@ -26,6 +24,7 @@ type Location struct {
 	Vpn         bool           `json:"vpn"`
 	Comment     string         `json:"comment"`
 	Scores      LocationScores `json:"scores"`
+	Map         string         `json:"map"`
 }
 
 type LocationScores struct {
@@ -39,28 +38,51 @@ type LocationScores struct {
 	BotStatus   bool   `json:"bot_status"`
 }
 
-func (l *Location) Output(fields ...string) {
+// Output reworked to support ordered categories with conditional field output and correct struct handling
+func (l *Location) Output(categories map[string][]string, orderedCategories []string) {
 	val := reflect.ValueOf(*l)
-	typ := val.Type()
 
-	fieldMap := make(map[string]reflect.Value)
-	for i := 0; i < val.NumField(); i++ {
-		fieldMap[strings.ToLower(typ.Field(i).Name)] = val.Field(i)
-	}
+	// Prepare color outputs
+	cyan := color.New(color.FgCyan).Add(color.Bold)
+	white := color.New(color.FgWhite)                     // For field values
+	magenta := color.New(color.FgMagenta).Add(color.Bold) // For categories
+	cyanP := cyan.PrintfFunc()
+	whiteP := white.PrintfFunc()
+	magentaP := magenta.PrintfFunc() // Print function for category names in magenta
 
-	for _, field := range fields {
-		fieldValue, exists := fieldMap[strings.ToLower(field)]
+	// Iterate through each category in the ordered list
+	for _, category := range orderedCategories {
+		fields, exists := categories[category]
 		if !exists {
-			color.Red("Field %s does not exist", field)
-			continue
+			continue // Skip categories not defined in the map
 		}
-		// color.Cyan("%s: ", field)
+		magentaP("\n%s\n", capitalizeFirst(category)) // Print category name in magenta
+		for _, field := range fields {
+			fieldVal, found := findField(val, field)
+			if !found {
+				continue // Skip fields not found
+			}
+			if field == "date" {
+				handleDateField(fieldVal, cyanP, whiteP)
+				continue
+			}
 
-		cyan := color.New(color.FgCyan)
-		cyan.Add(color.Bold)
+			if field == "map" {
+				handleMapField(fieldVal, cyanP, whiteP, l.Latitude, l.Longitude)
+			}
 
-		cyanP := cyan.PrintfFunc()
-		cyanP("%s: ", field)
-		fmt.Println(fieldValue.Interface())
+			fieldValue := fieldVal.Interface()
+			if reflect.TypeOf(fieldValue).Kind() == reflect.Struct && field == "scores" {
+				// Handle struct types specifically for 'scores'
+				if field != "scores" {
+					cyanP("  %s:\n", capitalizeFirst(field))
+				}
+				printStructFields(fieldVal, cyanP, whiteP)
+			} else if !isEmpty(fieldValue) {
+				// Skip empty fields except for 'date', which is handled separately
+				cyanP("  %s: ", capitalizeFirst(field))
+				whiteP("%v\n", fieldValue)
+			}
+		}
 	}
 }

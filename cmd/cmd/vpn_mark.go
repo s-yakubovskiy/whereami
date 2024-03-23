@@ -17,6 +17,7 @@ var markVPNCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Cfg
 		interfaceName := args[0]
+		introduce()
 
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 		if err != nil {

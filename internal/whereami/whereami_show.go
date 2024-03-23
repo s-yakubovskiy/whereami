@@ -2,6 +2,31 @@ package whereami
 
 import "github.com/s-yakubovskiy/whereami/internal/common"
 
+var (
+	categories = map[string][]string{
+		"Geographical Information": {
+			"country", "countryCode", "region", "regionCode",
+			"city", "timezone", "zip", "latitude", "longitude",
+		},
+		"Network Information": {
+			"ip", "isp", "asn", "flag",
+		},
+		"Security Assessments": {
+			"vpn", "scores",
+		},
+		"Miscellaneous": {
+			"date", "comment", "map",
+		},
+	}
+
+	orderedCategories = []string{
+		"Network Information",
+		"Geographical Information",
+		"Security Assessments",
+		"Miscellaneous",
+	}
+)
+
 func (l *Locator) Show() {
 	// Fetching data from IP API
 	ip, err := l.client.GetIP()
@@ -32,17 +57,26 @@ func (l *Locator) Show() {
 		}
 
 		// output to stding colorized
-		location.Output(
-			"ip",
-			"country",
-			"region",
-			"regioncode",
-			"city",
-			"timezone",
-			"vpn",
-			"comment",
-		)
+		// TODO: output will be always full for now (reconsider adding --short flag later)
+		// location.Output(
+		// 	"ip",
+		// 	"country",
+		// 	"region",
+		// 	"regioncode",
+		// 	"city",
+		// 	"timezone",
+		// 	"vpn",
+		// 	"comment",
+		// )
 	}
+
+	// location.Output(
+	// 	"ip", "country", "countryCode", "region", "regionCode",
+	// 	"city", "timezone", "zip", "flag",
+	// 	"isp", "asn", "latitude", "longitude", "vpn", "comment", "scores",
+	// )
+
+	location.Output(categories, orderedCategories)
 }
 
 func (l *Locator) ShowFull() {
@@ -75,10 +109,11 @@ func (l *Locator) ShowFull() {
 		}
 
 		// output to stding colorized
-		location.Output(
-			"ip", "country", "countryCode", "region", "regionCode",
-			"city", "timezone", "zip", "flag",
-			"isp", "asn", "latitude", "longitude", "vpn", "comment", "scores",
-		)
+		// location.Output(
+		// 	"ip", "country", "countryCode", "region", "regionCode",
+		// 	"city", "timezone", "zip", "flag",
+		// 	"isp", "asn", "latitude", "longitude", "vpn", "comment", "scores",
+		// )
+		location.Output(categories, orderedCategories)
 	}
 }

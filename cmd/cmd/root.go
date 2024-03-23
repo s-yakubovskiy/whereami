@@ -56,6 +56,7 @@ var rootCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		locator := whereami.NewLocator(client, dbcli, dumper, cfg.ProviderConfigs.IpQualityScore.Enabled)
+		introduce()
 		locator.Show()
 	},
 }

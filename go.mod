@@ -7,6 +7,7 @@ require (
 	github.com/ipdata/go v0.7.2
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.18
+	github.com/mbndr/figlet4go v0.0.0-20190224160619-d6cef5b186ea
 	github.com/pressly/goose v2.7.0+incompatible
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/cobra v1.8.0

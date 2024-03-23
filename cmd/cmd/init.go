@@ -23,6 +23,7 @@ var initCmd = &cobra.Command{
 			log.Fatalf("Failed to initialize database: %v", err)
 		}
 
+		introduce()
 		fmt.Println("Initialization complete.")
 	},
 }

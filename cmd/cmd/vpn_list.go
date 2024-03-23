@@ -15,6 +15,7 @@ var listVPNCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Cfg
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
+		introduce()
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}

@@ -10,17 +10,17 @@ import (
 
 var _ IPQualityInterface = &IpQualityScoreClient{}
 
+// IPQualityInterface defines a method for adding quality metrics to a given IP location.
 type IPQualityInterface interface {
 	AddIPQuality(*contracts.Location, string) (*contracts.Location, error)
 }
 
-// var _ v1.CloudSQLServiceServer = &CloudSQLService{}
-
-// IpApi client initialization
+// IpApiClient wraps the ipapi client and implements the IPLocationInterface for getting location information.
 type IpApiClient struct {
 	client *ipapi.IpApi
 }
 
+// NewIpApiClient creates a new instance of IpApiClient using the provided configuration.
 func NewIpApiClient(cfg config.ProviderConfig) (*IpApiClient, error) {
 	client, err := ipapi.NewIpApi(cfg.URL, cfg.APIKey)
 	return &IpApiClient{
@@ -28,6 +28,7 @@ func NewIpApiClient(cfg config.ProviderConfig) (*IpApiClient, error) {
 	}, err
 }
 
+// GetLocation uses the ipapi client to lookup the location of the given IP and convert it to a Location struct.
 func (l *IpApiClient) GetLocation(ip string) (*contracts.Location, error) {
 	data, err := l.client.Lookup(ip)
 	if err != nil {
@@ -36,11 +37,12 @@ func (l *IpApiClient) GetLocation(ip string) (*contracts.Location, error) {
 	return ConvertIpApiToLocation(data)
 }
 
-// IpData client initialization
+// IpDataClient wraps the ipdata client and implements the IPLocationInterface for getting location information.
 type IpDataClient struct {
 	client *ipdata.Client
 }
 
+// NewIpDataClient creates a new instance of IpDataClient using the provided configuration.
 func NewIpDataClient(cfg config.ProviderConfig) (*IpDataClient, error) {
 	client, err := ipdata.NewClient(cfg.APIKey)
 	return &IpDataClient{
@@ -48,6 +50,7 @@ func NewIpDataClient(cfg config.ProviderConfig) (*IpDataClient, error) {
 	}, err
 }
 
+// GetLocation uses the ipdata client to lookup the location of the given IP and convert it to a Location struct.
 func (l *IpDataClient) GetLocation(ip string) (*contracts.Location, error) {
 	data, err := l.client.Lookup(ip)
 	if err != nil {
@@ -56,11 +59,12 @@ func (l *IpDataClient) GetLocation(ip string) (*contracts.Location, error) {
 	return ConvertIpDataToLocation(data)
 }
 
-// IpQualityScore client initialization
+// IpQualityScoreClient wraps the ipqualityscore client and implements the IPQualityInterface for adding quality metrics.
 type IpQualityScoreClient struct {
 	client *ipqualityscore.IpQualityScore
 }
 
+// NewIpQualityScoreClient creates a new instance of IpQualityScoreClient using the provided configuration.
 func NewIpQualityScoreClient(cfg config.ProviderConfig) (*IpQualityScoreClient, error) {
 	client, err := ipqualityscore.NewIpQualityScore(cfg.URL, cfg.APIKey)
 	return &IpQualityScoreClient{
@@ -68,6 +72,7 @@ func NewIpQualityScoreClient(cfg config.ProviderConfig) (*IpQualityScoreClient, 
 	}, err
 }
 
+// AddIPQuality uses the ipqualityscore client to lookup the quality score of the given IP and enriches the Location struct with this data.
 func (l *IpQualityScoreClient) AddIPQuality(location *contracts.Location, ip string) (*contracts.Location, error) {
 	qualityScore, err := l.client.Lookup(ip)
 	if err != nil {

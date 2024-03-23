@@ -38,6 +38,7 @@ var showCmd = &cobra.Command{
 			log.Fatalf("Failed to open database: %v", err)
 		}
 		locator := whereami.NewLocator(client, dbcli, dumper, cfg.ProviderConfigs.IpQualityScore.Enabled)
+		introduce()
 		if fullShow {
 			locator.ShowFull()
 		} else {

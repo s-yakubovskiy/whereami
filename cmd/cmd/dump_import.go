@@ -22,6 +22,7 @@ var importDumpCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
+		introduce()
 		dumper.Import(importPath)
 	},
 }
