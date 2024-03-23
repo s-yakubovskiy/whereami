@@ -2,8 +2,8 @@ GOHOSTOS:=$(shell go env GOHOSTOS)
 GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
 
-#SERVICE_NAME ?= $(shell basename $(CURDIR)) # this can be changed if service name doesn't match with current directory
-SERVICE_NAME ?=whereami# this can be changed if service name doesn't match with current directory
+SERVICE_NAME ?= $(shell basename $(CURDIR)) # this can be changed if service name doesn't match with current directory
+# SERVICE_NAME ?=whereami# this can be changed if service name doesn't match with current directory
 
 ifeq ($(GOHOSTOS), windows)
 	#the `find.exe` is different from `find` in bash/shell.
