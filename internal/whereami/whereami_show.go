@@ -15,7 +15,7 @@ var (
 			"vpn", "scores",
 		},
 		"Miscellaneous": {
-			"date", "comment", "map",
+			"map", "date", "comment",
 		},
 	}
 

@@ -20,4 +20,5 @@ func introduce() {
 
 	renderStr, _ := ascii.RenderOpts(appName, options)
 	fmt.Print(renderStr)
+	fmt.Println("    ... getting your location data ...")
 }

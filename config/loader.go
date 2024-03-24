@@ -84,11 +84,11 @@ func (loader *Loader) decorateViper(v *viper.Viper) {
 }
 
 func (loader *Loader) Load(appConfig *AppConfig) *AppConfig {
+	// Load default .env file
 	_ = godotenv.Load()
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Printf("Error loading .env file: %v\n", err)
-	// }
+
+	// Load additional environment variables from a specific file
+	_ = godotenv.Load("/etc/whereami/environment")
 
 	v := viper.New()
 	loader.decorateViper(v)
