@@ -55,7 +55,8 @@ var rootCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Failed to open database: %v\n", err)
 			os.Exit(1)
 		}
-		locator := whereami.NewLocator(client, dbcli, dumper, cfg.ProviderConfigs.IpQualityScore.Enabled)
+		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup)
+		locator := whereami.NewLocator(client, dbcli, dumper, lCfg)
 		introduce()
 		locator.Show()
 	},

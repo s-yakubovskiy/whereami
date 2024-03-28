@@ -1,6 +1,8 @@
 package whereami
 
-import "github.com/s-yakubovskiy/whereami/internal/common"
+import (
+	"github.com/s-yakubovskiy/whereami/internal/common"
+)
 
 var (
 	categories = map[string][]string{
@@ -28,10 +30,16 @@ var (
 )
 
 func (l *Locator) Show() {
-	// Fetching data from IP API
-	ip, err := l.client.GetIP()
-	if err != nil {
-		common.Errorln(err.Error())
+	var ip string
+	var err error
+
+	if l.iplookup == "" {
+		ip, err = l.client.GetIP()
+		if err != nil {
+			common.Errorln(err.Error())
+		}
+	} else {
+		ip = l.iplookup
 	}
 	location, err := l.client.GetLocation(ip)
 	if err != nil {
@@ -80,11 +88,18 @@ func (l *Locator) Show() {
 }
 
 func (l *Locator) ShowFull() {
-	// Fetching data from IP API
-	ip, err := l.client.GetIP()
-	if err != nil {
-		common.Errorln(err.Error())
+	var ip string
+	var err error
+
+	if l.iplookup == "" {
+		ip, err = l.client.GetIP()
+		if err != nil {
+			common.Errorln(err.Error())
+		}
+	} else {
+		ip = l.iplookup
 	}
+	// Fetching data from IP API
 	location, err := l.client.GetLocation(ip)
 	if err != nil {
 		common.Errorln(err.Error())

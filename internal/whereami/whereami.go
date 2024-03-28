@@ -28,13 +28,27 @@ type Locator struct {
 	dbclient  KeeperInterface
 	dumper    *dumper.DumperJSON
 	ipquality bool
+	iplookup  string
 }
 
-func NewLocator(api *apimanager.APIManager, dbapi *dbclient.LocationKeeper, dumper *dumper.DumperJSON, ipquality bool) *Locator {
+type Config struct {
+	IpQuality bool
+	IP        string
+}
+
+func NewConfig(ipquality bool, ip string) *Config {
+	return &Config{
+		IpQuality: ipquality,
+		IP:        ip,
+	}
+}
+
+func NewLocator(api *apimanager.APIManager, dbapi *dbclient.LocationKeeper, dumper *dumper.DumperJSON, cfg *Config) *Locator {
 	return &Locator{
 		client:    api,
 		dbclient:  dbapi,
 		dumper:    dumper,
-		ipquality: ipquality,
+		ipquality: cfg.IpQuality,
+		iplookup:  cfg.IP,
 	}
 }

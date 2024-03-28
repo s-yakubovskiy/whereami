@@ -31,7 +31,8 @@ var storeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
-		locator := whereami.NewLocator(client, dbcli, dumper, cfg.ProviderConfigs.IpQualityScore.Enabled)
+		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup)
+		locator := whereami.NewLocator(client, dbcli, dumper, lCfg)
 		locator.Store()
 	},
 }

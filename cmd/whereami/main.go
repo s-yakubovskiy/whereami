@@ -11,6 +11,9 @@ func init() {
 	config.Init()
 }
 
+// TODO:
+// 1.
+
 func main() {
 	cmd.Execute()
 }

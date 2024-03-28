@@ -16,6 +16,7 @@ import (
 var (
 	fullShow     bool
 	providerShow string
+	ipLookup     string
 )
 
 var showCmd = &cobra.Command{
@@ -37,7 +38,8 @@ var showCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
-		locator := whereami.NewLocator(client, dbcli, dumper, cfg.ProviderConfigs.IpQualityScore.Enabled)
+		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup)
+		locator := whereami.NewLocator(client, dbcli, dumper, lCfg)
 		introduce()
 		if fullShow {
 			locator.ShowFull()
@@ -50,5 +52,6 @@ var showCmd = &cobra.Command{
 func init() {
 	showCmd.Flags().BoolVarP(&fullShow, "full", "f", false, "Display full output")
 	showCmd.Flags().StringVarP(&providerShow, "provider", "p", "", "Select ip location provider: [ipapi, ipdata]")
+	showCmd.Flags().StringVarP(&ipLookup, "ip", "i", "", "Specify public IP to lookup info")
 	rootCmd.AddCommand(showCmd)
 }
