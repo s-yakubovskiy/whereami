@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/s-yakubovskiy/whereami/config"
 	"github.com/s-yakubovskiy/whereami/internal/apimanager"
@@ -44,6 +43,9 @@ var rootCmd = &cobra.Command{
 	Long:  `WhereAmI is a CLI application that allows users to find their geolocation based on their public IP address.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Cfg
+		if providerShow != "" {
+			cfg.MainProvider = providerShow
+		}
 
 		ipconfig, err := ipconfig.NewIPConfig()
 		primary, secondary, ipquality, err := getLocationClient(cfg.MainProvider)
@@ -52,20 +54,22 @@ var rootCmd = &cobra.Command{
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 		dumper, err := dumper.NewDumperJSON(dbcli)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to open database: %v\n", err)
-			os.Exit(1)
+			log.Fatalf("Failed to open database: %v", err)
 		}
 		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup)
 		locator := whereami.NewLocator(client, dbcli, dumper, lCfg)
 		introduce()
-		locator.Show()
+		if fullShow {
+			locator.ShowFull()
+		} else {
+			locator.Show()
+		}
 	},
 }
 
-// Execute executes the root command.
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+func init() {
+	rootCmd.Flags().BoolVarP(&fullShow, "full", "f", false, "Display full output")
+	rootCmd.Flags().StringVarP(&providerShow, "provider", "p", "", "Select ip location provider: [ipapi, ipdata]")
+	rootCmd.Flags().StringVarP(&ipLookup, "ip-lookup", "i", "", "Specify public IP to lookup info")
+	//
 }
