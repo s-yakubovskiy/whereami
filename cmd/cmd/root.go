@@ -70,6 +70,6 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.Flags().BoolVarP(&fullShow, "full", "f", false, "Display full output")
 	rootCmd.Flags().StringVarP(&providerShow, "provider", "p", "", "Select ip location provider: [ipapi, ipdata]")
-	rootCmd.Flags().StringVarP(&ipLookup, "ip-lookup", "i", "", "Specify public IP to lookup info")
+	rootCmd.Flags().StringVarP(&ipLookup, "ip", "i", "", "Specify public IP to lookup info")
 	//
 }
