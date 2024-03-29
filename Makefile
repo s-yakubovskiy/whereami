@@ -1,6 +1,7 @@
 GOHOSTOS:=$(shell go env GOHOSTOS)
 GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
+COMMIT=$(shell git rev-parse --short HEAD)
 
 SERVICE_NAME ?= $(shell basename $(CURDIR)) # this can be changed if service name doesn't match with current directory
 # SERVICE_NAME ?=whereami# this can be changed if service name doesn't match with current directory
@@ -23,7 +24,8 @@ endif
 .PHONY: build
 # build
 build:
-	@mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+# go build -ldflags  '-X github.com/s-yakubovskiy/whereami/cmd/cmd.Version=2.0.1 -X github.com/s-yakubovskiy/whereami/cmd/cmd.Commit=adndf32nd' -o ./bin/ ./... 
+	@mkdir -p bin/ && go build -ldflags "-X github.com/s-yakubovskiy/whereami/cmd/cmd.Version=$(VERSION) -X github.com/s-yakubovskiy/whereami/cmd/cmd.Commit=$(COMMIT)" -o ./bin/ ./...
 
 
 .PHONY: lint

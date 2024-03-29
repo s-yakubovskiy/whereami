@@ -15,5 +15,6 @@ func init() {
 // 1.
 
 func main() {
+	// log.Fatal("version:", Version)
 	cmd.Execute()
 }

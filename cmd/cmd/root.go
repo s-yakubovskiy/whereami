@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/s-yakubovskiy/whereami/config"
 	"github.com/s-yakubovskiy/whereami/internal/apimanager"
@@ -43,6 +44,13 @@ var rootCmd = &cobra.Command{
 	Long:  `WhereAmI is a CLI application that allows users to find their geolocation based on their public IP address.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Cfg
+		introduce()
+		if showVersion {
+			fmt.Println("\nBuild Info:")
+			fmt.Println("  Version:", Version)
+			fmt.Println("  Commit:", Commit)
+			os.Exit(0)
+		}
 		if providerShow != "" {
 			cfg.MainProvider = providerShow
 		}
@@ -58,7 +66,6 @@ var rootCmd = &cobra.Command{
 		}
 		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup)
 		locator := whereami.NewLocator(client, dbcli, dumper, lCfg)
-		introduce()
 		if fullShow {
 			locator.ShowFull()
 		} else {
@@ -71,5 +78,6 @@ func init() {
 	rootCmd.Flags().BoolVarP(&fullShow, "full", "f", false, "Display full output")
 	rootCmd.Flags().StringVarP(&providerShow, "provider", "p", "", "Select ip location provider: [ipapi, ipdata]")
 	rootCmd.Flags().StringVarP(&ipLookup, "ip", "i", "", "Specify public IP to lookup info")
+	rootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "Display application version")
 	//
 }
