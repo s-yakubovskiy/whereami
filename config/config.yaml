@@ -15,6 +15,9 @@ provider_configs:
     url: "https://ipqualityscore.com/api/json/ip"
     api_key: ""
     enabled: true
+  public_ip:
+    - ifconfig.me
+    - ipapi.io
 
 database:
   enabled: true
