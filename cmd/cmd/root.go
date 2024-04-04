@@ -51,11 +51,14 @@ var rootCmd = &cobra.Command{
 			fmt.Println("  Commit:", Commit)
 			os.Exit(0)
 		}
-		if providerShow != "" {
-			cfg.MainProvider = providerShow
+		if locationApi != "" {
+			cfg.MainProvider = locationApi
+		}
+		if publicIpApi != "" {
+			cfg.ProviderConfigs.PublicIpProvider = publicIpApi
 		}
 
-		ipconfig, err := ipconfig.NewIPConfig()
+		ipconfig, err := ipconfig.NewIPConfig(cfg.ProviderConfigs.PublicIpProvider)
 		primary, secondary, ipquality, err := getLocationClient(cfg.MainProvider)
 
 		client := apimanager.NewAPIManager(ipconfig, primary, secondary, ipquality)
@@ -76,8 +79,9 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.Flags().BoolVarP(&fullShow, "full", "f", false, "Display full output")
-	rootCmd.Flags().StringVarP(&providerShow, "provider", "p", "", "Select ip location provider: [ipapi, ipdata]")
-	rootCmd.Flags().StringVarP(&ipLookup, "ip", "i", "", "Specify public IP to lookup info")
+	rootCmd.Flags().StringVarP(&locationApi, "location-api", "l", "", "Select ip location provider: [ipapi, ipdata]")
+	rootCmd.Flags().StringVarP(&publicIpApi, "public-ip-api", "p", "", "Select public ip api provider: [ifconfig.me, ipinfo.io, icanhazip.com]")
+	rootCmd.Flags().StringVarP(&ipLookup, "ip", "", "", "Specify public IP to lookup info")
 	rootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "Display application version")
 	//
 }

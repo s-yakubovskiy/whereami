@@ -33,7 +33,7 @@ func startDaemon() {
 	for _, task := range cfg.CrontabTasks {
 		taskCopy := task // Create a copy of the task for the current iteration
 		_, err := c.AddFunc(taskCopy.Schedule, func() {
-			ipconfig, err := ipconfig.NewIPConfig()
+			ipconfig, err := ipconfig.NewIPConfig(cfg.ProviderConfigs.PublicIpProvider)
 			primary, secondary, ipquality, err := getLocationClient(cfg.MainProvider)
 			client := apimanager.NewAPIManager(ipconfig, primary, secondary, ipquality)
 			dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)

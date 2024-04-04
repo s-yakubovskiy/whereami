@@ -13,6 +13,7 @@ type LocatorInterface interface {
 	GetLocation(ip string) (*contracts.Location, error)
 	GetVPN([]string) (bool, error)
 	GetIP() (string, error)
+	ShowIpProvider() string
 	AddIPQuality(*contracts.Location, string) (*contracts.Location, error)
 }
 

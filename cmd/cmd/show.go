@@ -14,9 +14,10 @@ import (
 )
 
 var (
-	fullShow     bool
-	providerShow string
-	ipLookup     string
+	fullShow    bool
+	locationApi string
+	publicIpApi string
+	ipLookup    string
 )
 
 var showCmd = &cobra.Command{
@@ -25,11 +26,14 @@ var showCmd = &cobra.Command{
 	Long:  `This command Show current public ip address and fetching location information. Print to stdout`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Cfg
-		if providerShow != "" {
-			cfg.MainProvider = providerShow
+		if locationApi != "" {
+			cfg.MainProvider = locationApi
+		}
+		if publicIpApi != "" {
+			cfg.ProviderConfigs.PublicIpProvider = publicIpApi
 		}
 
-		ipconfig, err := ipconfig.NewIPConfig()
+		ipconfig, err := ipconfig.NewIPConfig(cfg.ProviderConfigs.PublicIpProvider)
 		primary, secondary, ipquality, err := getLocationClient(cfg.MainProvider)
 
 		client := apimanager.NewAPIManager(ipconfig, primary, secondary, ipquality)
@@ -51,7 +55,8 @@ var showCmd = &cobra.Command{
 
 func init() {
 	showCmd.Flags().BoolVarP(&fullShow, "full", "f", false, "Display full output")
-	showCmd.Flags().StringVarP(&providerShow, "provider", "p", "", "Select ip location provider: [ipapi, ipdata]")
+	showCmd.Flags().StringVarP(&locationApi, "location-api", "l", "", "Select ip location provider: [ipapi, ipdata]")
+	showCmd.Flags().StringVarP(&publicIpApi, "public-ip-api", "p", "", "Select public ip api provider: [ifconfig.me, ipinfo.io, icanhazip.com]")
 	showCmd.Flags().StringVarP(&ipLookup, "ip", "i", "", "Specify public IP to lookup info")
 	rootCmd.AddCommand(showCmd)
 }

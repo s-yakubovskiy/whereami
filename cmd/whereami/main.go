@@ -13,11 +13,13 @@ func init() {
 
 // TODO:
 // 1. Test running whereami on clean vps with
-// go install github.com/s-yakubovskiy/whereami/cmd/whereami@v1.0.2
+//    go install github.com/s-yakubovskiy/whereami/cmd/whereami@v1.0.2
 // 2. Make default values for config (if it wasn't found). Create it under ~/.config/whereami/
 // 3. Update documentation and how-to install guide. Also how-to setup IP Quality with api key
 // 4. Choose IP Provider overrides from commandline? ipinfo.io ?
 
 func main() {
+	// fmt.Printf("%+v\n", config.Cfg)
+	// os.Exit(1)
 	cmd.Execute()
 }

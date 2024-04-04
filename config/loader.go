@@ -92,12 +92,12 @@ func (loader *Loader) Load(appConfig *AppConfig) *AppConfig {
 
 	v := viper.New()
 	loader.decorateViper(v)
-	v.SetConfigName("config")                  // Name of config file (without extension)
-	v.SetConfigType("yaml")                    // Config file type
-	v.AddConfigPath("/etc/whereami/")          // Path to look for the config file in
-	v.AddConfigPath("$HOME/.whereami/")        // Call multiple times to add many search paths
-	v.AddConfigPath("$HOME/.config/whereami/") // Call multiple times to add many search paths
-	v.AddConfigPath("./config/")               // Optionally look for config in the working directory
+	v.SetConfigName("config")         // Name of config file (without extension)
+	v.SetConfigType("yaml")           // Config file type
+	v.AddConfigPath("/etc/whereami/") // Path to look for the config file in
+	// v.AddConfigPath("$HOME/.whereami/")        // Call multiple times to add many search paths
+	// v.AddConfigPath("$HOME/.config/whereami/") // Call multiple times to add many search paths
+	v.AddConfigPath("./config/") // Optionally look for config in the working directory
 
 	if err := v.ReadInConfig(); err != nil {
 		fmt.Printf("Error reading config file: %v\n", err)

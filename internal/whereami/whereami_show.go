@@ -30,61 +30,8 @@ var (
 )
 
 func (l *Locator) Show() {
-	var ip string
-	var err error
-
-	if l.iplookup == "" {
-		ip, err = l.client.GetIP()
-		if err != nil {
-			common.Errorln(err.Error())
-		}
-	} else {
-		ip = l.iplookup
-	}
-	location, err := l.client.GetLocation(ip)
-	if err != nil {
-		common.Errorln(err.Error())
-	}
-	if location != nil && ip != "" {
-		vpninterfaces, err := l.dbclient.GetVPNInterfaces()
-		if err != nil {
-			common.Warnln(err.Error())
-		}
-
-		vpn, err := l.client.GetVPN(vpninterfaces)
-		if err != nil {
-			common.Warnln(err.Error())
-		}
-
-		if vpn {
-			location.Vpn = true
-		}
-
-		if l.ipquality {
-			l.client.AddIPQuality(location, ip)
-		}
-
-		// output to stding colorized
-		// TODO: output will be always full for now (reconsider adding --short flag later)
-		// location.Output(
-		// 	"ip",
-		// 	"country",
-		// 	"region",
-		// 	"regioncode",
-		// 	"city",
-		// 	"timezone",
-		// 	"vpn",
-		// 	"comment",
-		// )
-	}
-
-	// location.Output(
-	// 	"ip", "country", "countryCode", "region", "regionCode",
-	// 	"city", "timezone", "zip", "flag",
-	// 	"isp", "asn", "latitude", "longitude", "vpn", "comment", "scores",
-	// )
-
-	location.Output(categories, orderedCategories)
+	// NOTE: right now no difference between full and short `show` output
+	l.ShowFull()
 }
 
 func (l *Locator) ShowFull() {
@@ -123,12 +70,9 @@ func (l *Locator) ShowFull() {
 			l.client.AddIPQuality(location, ip)
 		}
 
-		// output to stding colorized
-		// location.Output(
-		// 	"ip", "country", "countryCode", "region", "regionCode",
-		// 	"city", "timezone", "zip", "flag",
-		// 	"isp", "asn", "latitude", "longitude", "vpn", "comment", "scores",
-		// )
+		// update comment for location
+		location.Comment += ". Using public ip provider: " + l.client.ShowIpProvider()
+
 		location.Output(categories, orderedCategories)
 	}
 }

@@ -21,9 +21,10 @@ type Database struct {
 }
 
 type ProviderConfigs struct {
-	IpApi          ProviderConfig `mapstructure:"ipapi"`
-	IpData         ProviderConfig `mapstructure:"ipdata"`
-	IpQualityScore ProviderConfig `mapstructure:"ipqualityscore"`
+	IpApi            ProviderConfig `mapstructure:"ipapi"`
+	IpData           ProviderConfig `mapstructure:"ipdata"`
+	IpQualityScore   ProviderConfig `mapstructure:"ipqualityscore"`
+	PublicIpProvider string         `mapstructure:"public_ip_provider"`
 }
 
 type ProviderConfig struct {

@@ -15,9 +15,11 @@ provider_configs:
     url: "https://ipqualityscore.com/api/json/ip"
     api_key: ""
     enabled: true
-  public_ip:
-    - ifconfig.me
-    - ipapi.io
+  public_ip_provider: ifconfig.me
+  # NOTE: also valid to use
+  # ifconfig.me
+  # ipapi.io
+  # icanhazip.com
 
 database:
   enabled: true

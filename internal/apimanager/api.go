@@ -13,6 +13,7 @@ import (
 // IPConfigInterface defines the method for retrieving the current IP address.
 type IPConfigInterface interface {
 	GetIP() (string, error)
+	ShowIpProvider() string
 }
 
 // IPLocationInterface defines the method for retrieving the geographical location of an IP address.
@@ -41,6 +42,10 @@ func NewAPIManager(ip *ipconfig.IPConfig, primary, secondary IPLocationInterface
 // GetIP proxies the request to the underlying IP configuration service to retrieve the current IP address.
 func (l *APIManager) GetIP() (string, error) {
 	return l.ipconfig.GetIP()
+}
+
+func (l *APIManager) ShowIpProvider() string {
+	return l.ipconfig.ShowIpProvider()
 }
 
 // GetLocation attempts to find the geographical location of the given IP address, using the primary service and falling back to the secondary if necessary.

@@ -1,23 +1,27 @@
 package ipconfig
 
 import (
+	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
-const (
-	IP_CONFIG_ADDR = "http://ifconfig.me"
-)
+type IPConfig struct {
+	url string
+}
 
-type IPConfig struct{}
+func NewIPConfig(url string) (*IPConfig, error) {
+	return &IPConfig{url: fmt.Sprintf("http://%s", url)}, nil
+}
 
-func NewIPConfig() (*IPConfig, error) {
-	return &IPConfig{}, nil
+func (l *IPConfig) ShowIpProvider() string {
+	return l.url
 }
 
 func (l *IPConfig) GetIP() (string, error) {
 	// // Fetching public IP address
-	resp, err := http.Get(IP_CONFIG_ADDR)
+	resp, err := http.Get(l.url)
 	if err != nil {
 		return "", err
 	}
@@ -26,5 +30,6 @@ func (l *IPConfig) GetIP() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(ip), nil
+
+	return strings.Join(strings.Fields(string(ip)), " "), nil
 }
