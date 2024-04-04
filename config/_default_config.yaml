@@ -1,0 +1,30 @@
+log_level: debug
+
+main_provider: "ipdata"
+
+provider_configs:
+  ipapi:
+    url: "http://ip-api.com/json/"
+    api_key: ""
+    enabled: true
+  ipdata:
+    url: "https://api.ipdata.co"
+    api_key: ""
+    enabled: true
+  ipqualityscore:
+    url: "https://ipqualityscore.com/api/json/ip"
+    api_key: ""
+    enabled: true
+  public_ip_provider: ifconfig.me
+  # NOTE: also valid to use
+  # ifconfig.me
+  # ipapi.io
+  # icanhazip.com
+
+database:
+  enabled: true
+  type: sqlite
+  path: ~/work/common/whereami/whereami_db.sqlite
+
+crontab_tasks:
+  - schedule: "@every 1h"

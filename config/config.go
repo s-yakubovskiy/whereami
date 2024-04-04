@@ -7,11 +7,11 @@ import (
 var Cfg AppConfig
 
 type AppConfig struct {
-	LogLevel        string          `mapstructure:"log_level"`
+	LogLevel        string          `mapstructure:"log_level" yaml:"log_level"`
 	Database        Database        `mapstructure:"database"`
-	CrontabTasks    []CrontabTask   `mapstructure:"crontab_tasks"`
-	MainProvider    string          `mapstructure:"main_provider"`
-	ProviderConfigs ProviderConfigs `mapstructure:"provider_configs"`
+	CrontabTasks    []CrontabTask   `mapstructure:"crontab_tasks" yaml:"crontab_tasks"`
+	MainProvider    string          `mapstructure:"main_provider" yaml:"main_provider"`
+	ProviderConfigs ProviderConfigs `mapstructure:"provider_configs" yaml:"provider_configs"`
 }
 
 type Database struct {
@@ -24,12 +24,12 @@ type ProviderConfigs struct {
 	IpApi            ProviderConfig `mapstructure:"ipapi"`
 	IpData           ProviderConfig `mapstructure:"ipdata"`
 	IpQualityScore   ProviderConfig `mapstructure:"ipqualityscore"`
-	PublicIpProvider string         `mapstructure:"public_ip_provider"`
+	PublicIpProvider string         `mapstructure:"public_ip_provider" yaml:"public_ip_provider"`
 }
 
 type ProviderConfig struct {
 	URL     string `mapstructure:"url"`
-	APIKey  string `mapstructure:"api_key"`
+	APIKey  string `mapstructure:"api_key" yaml:"api_key"`
 	Enabled bool   `mapstructure:"enabled"`
 }
 
