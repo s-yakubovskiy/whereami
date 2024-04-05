@@ -25,6 +25,8 @@ go build -o bin/whereami
 ```
 
 ## Usage
+Initialize `whereami` with `whereami init` (applies migrations and configs).  
+
 After installation, you can run WhereAmI using the following command:
 
 ```bash
@@ -32,6 +34,19 @@ After installation, you can run WhereAmI using the following command:
 ```
 
 This command will display your current geolocation information.
+
+There are flags available to modify your query:
+```
+Flags:                                                                                                                                                                                
+    -f, --full                   Display full output                                                                                                                                    
+    -h, --help                   help for whereami                                                                                                                                      
+        --ip string              Specify public IP to lookup info                                                                                                                       
+    -l, --location-api string    Select ip location provider: [ipapi, ipdata]                                                                                                           
+    -p, --public-ip-api string   Select public ip api provider: [ifconfig.me, ipinfo.io/ip, icanhazip.com]                                                                                 
+    -v, --version                Display application version 
+```
+
+E.g. `whereami -l ipdata -p icanhazip.com` or `whereami --p 100.200.200.100` to query for particular IP 
 
 ### Commands
 - `show`: Display current public IP address and fetch location information.
@@ -49,44 +64,43 @@ This command will display your current geolocation information.
   ```
 
 ```bash
-dev ❯ whereami show --provider ipapi --full
+dev ❯ whereami --location-api ipapi 
              _                          _ 
  __      __ | |__    _ __   _ __ ___   (_)
  \ \ /\ / / | '_ \  | '__| | '_ ` _ \  | |
   \ V  V /  | | | | | |    | | | | | | | |
    \_/\_/   |_| |_| |_|    |_| |_| |_| |_|
                                           
+    ... getting your location data ...
 
 Network Information
-  ip: 139.28.220.186
-  isp: I-servers LTD
-  flag: 🇫🇮
+  ip: 38.54.75.103
+  isp: Kaopu Cloud HK Limited
+  flag: 🇦🇪
 
 Geographical Information
-  country: Finland
-  countryCode: FI
-  region: Uusimaa
-  regionCode: 18
-  city: Helsinki
-  timezone: Europe/Helsinki
-  zip: 00131
-  latitude: 60.1797
-  longitude: 24.9344
+  country: United Arab Emirates
+  countryCode: AE
+  region: Dubai
+  regionCode: DU
+  city: Dubai
+  timezone: Asia/Dubai
+  latitude: 25.2048
+  longitude: 55.2708
 
 Security Assessments
-  vpn: true
-  FraudScore: 100
+  vpn: false
+  FraudScore: 75
   IsCrawler: false
-  Host: 139.28.220.186
+  Host: 38.54.75.103
   Proxy: true
   VPN: true
-  Tor: true
+  Tor: false
   RecentAbuse: false
-  BotStatus: true
+  BotStatus: false
 
 Miscellaneous
-  date: Saturday, March 23, 2024, 15:06
-  comment: Fetched with ipapi provider. Updated with ipqualityscore provider
-  map: https://www.google.com/maps?q=60.179700,24.934400
-
+  map: https://www.google.com/maps?q=25.204800,55.270800
+  date: Friday, April 5, 2024, 09:15
+  comment: Fetched with ipapi provider. Updated with ipqualityscore provider. Using public ip provider: http://ifconfig.me
 ```
