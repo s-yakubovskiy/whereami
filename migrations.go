@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pressly/goose"
+	"github.com/pressly/goose/v3"
 )
 
 //go:embed db/migrations/*.sql
@@ -48,6 +48,7 @@ func NewGooseWorker(dataSourceName string) (*GooseWorker, error) {
 func (s *GooseWorker) InitDB() error {
 	// Run migrations using Goose
 	err := goose.SetDialect("sqlite3")
+	goose.SetBaseFS(embedMigrations)
 	if err != nil {
 		return err
 	}
