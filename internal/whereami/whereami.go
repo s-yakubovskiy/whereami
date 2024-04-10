@@ -22,6 +22,7 @@ type KeeperInterface interface {
 	StoreLocation(location *contracts.Location) error
 	AddVPNInterface(interfaceName string) error
 	GetVPNInterfaces() ([]string, error)
+	ShowLocations(num int) ([]*contracts.Location, error)
 }
 
 type Locator struct {

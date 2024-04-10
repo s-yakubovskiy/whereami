@@ -24,6 +24,7 @@ func handleDateField(fieldVal reflect.Value, cyanP func(format string, a ...inte
 		parsedTime, err := time.Parse(time.RFC3339, dateVal)
 		if err != nil {
 			// If parsing fails, use the original string value
+			cyanP("  date: ")
 			whiteP("%v\n", dateVal)
 			return
 		}
