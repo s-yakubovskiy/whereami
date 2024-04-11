@@ -38,7 +38,7 @@ lint:
 install: build
 	@sudo systemctl stop whereami.service
 	@cp ./bin/whereami ~/.local/bin/whereami
-	@cp ./config/config.yaml ~/.config/whereami/
+	@test -e ~/.config/whereami/config.yaml || cp ./config/config.yaml ~/.config/whereami/
 	@sudo systemctl daemon-reload
 	@sudo systemctl start whereami.service
 
