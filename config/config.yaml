@@ -26,5 +26,12 @@ database:
   type: sqlite
   path: ~/work/common/whereami/whereami_db.sqlite
 
+# NOTE: gps is experimantal feature which need up & running gpsd.service on your host
+gps:
+  enabled: false
+  timeout: 35s
+  gpsd_socket: /var/run/gpsd.sock
+
+
 crontab_tasks:
   - schedule: "@every 3h"

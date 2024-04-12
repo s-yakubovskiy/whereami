@@ -43,16 +43,41 @@ func handleMapField(fieldVal reflect.Value, cyanP func(format string, a ...inter
 	whiteP("%s\n", mapVal)
 }
 
-// printStructFields handles printing each field of a struct value.
+// isZeroValue checks if the given reflect.Value is considered a zero value for its type.
+func isZeroValue(v reflect.Value) bool {
+	// Handle cases where the value is a pointer or interface
+	if v.Kind() == reflect.Interface {
+		return v.IsNil()
+	}
+	// Use reflect's Zero function to compare with a zero value of the same type
+	return reflect.DeepEqual(v.Interface(), reflect.Zero(v.Type()).Interface())
+}
+
+// printStructFields handles printing each field of a struct value if they are not zero-valued.
 func printStructFields(val reflect.Value, cyanP func(format string, a ...interface{}), whiteP func(format string, a ...interface{})) {
 	lsTyp := val.Type()
 	for i := 0; i < val.NumField(); i++ {
 		field := lsTyp.Field(i)
 		fieldValue := val.Field(i)
+		// Check if the field should be skipped based on its zero value
+		// if isZeroValue(fieldValue) {
+		// 	continue // Skip this iteration if the value is zero
+		// }
 		cyanP("  %s: ", field.Name)
 		whiteP("%v\n", fieldValue.Interface())
 	}
 }
+
+// // printStructFields handles printing each field of a struct value.
+// func printStructFields(val reflect.Value, cyanP func(format string, a ...interface{}), whiteP func(format string, a ...interface{})) {
+// 	lsTyp := val.Type()
+// 	for i := 0; i < val.NumField(); i++ {
+// 		field := lsTyp.Field(i)
+// 		fieldValue := val.Field(i)
+// 		cyanP("  %s: ", field.Name)
+// 		whiteP("%v\n", fieldValue.Interface())
+// 	}
+// }
 
 func capitalizeFirst(s string) string {
 	if s == "" {

@@ -5,6 +5,8 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/contracts"
 	"github.com/s-yakubovskiy/whereami/internal/dbclient"
 	"github.com/s-yakubovskiy/whereami/internal/dumper"
+	"github.com/s-yakubovskiy/whereami/pkg/gpsdfetcher"
+	"github.com/stratoberry/go-gpsd"
 )
 
 // var _ LocatorInterface = &Locator{}
@@ -25,32 +27,40 @@ type KeeperInterface interface {
 	ShowLocations(num int) ([]*contracts.Location, error)
 }
 
+type GPSInterface interface {
+	Connect() error
+	Close() error
+	Fetch() (*gpsd.TPVReport, error)
+}
+
 type Locator struct {
-	client    LocatorInterface
-	dbclient  KeeperInterface
-	dumper    *dumper.DumperJSON
-	ipquality bool
-	iplookup  string
+	client   LocatorInterface
+	dbclient KeeperInterface
+	dumper   *dumper.DumperJSON
+	gps      GPSInterface
+	cfg      *Config
 }
 
 type Config struct {
 	IpQuality bool
 	IP        string
+	GPS       bool
 }
 
-func NewConfig(ipquality bool, ip string) *Config {
+func NewConfig(ipquality bool, ip string, gps bool) *Config {
 	return &Config{
 		IpQuality: ipquality,
 		IP:        ip,
+		GPS:       gps,
 	}
 }
 
-func NewLocator(api *apimanager.APIManager, dbapi *dbclient.LocationKeeper, dumper *dumper.DumperJSON, cfg *Config) *Locator {
+func NewLocator(api *apimanager.APIManager, dbapi *dbclient.LocationKeeper, dumper *dumper.DumperJSON, gps *gpsdfetcher.GPSDFetcher, cfg *Config) *Locator {
 	return &Locator{
-		client:    api,
-		dbclient:  dbapi,
-		dumper:    dumper,
-		ipquality: cfg.IpQuality,
-		iplookup:  cfg.IP,
+		client:   api,
+		dbclient: dbapi,
+		dumper:   dumper,
+		gps:      gps,
+		cfg:      cfg,
 	}
 }

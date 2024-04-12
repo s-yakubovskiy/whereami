@@ -9,6 +9,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/dbclient"
 	"github.com/s-yakubovskiy/whereami/internal/dumper"
 	"github.com/s-yakubovskiy/whereami/internal/whereami"
+	"github.com/s-yakubovskiy/whereami/pkg/gpsdfetcher"
 	"github.com/s-yakubovskiy/whereami/pkg/ipconfig"
 	"github.com/spf13/cobra"
 )
@@ -38,11 +39,12 @@ func startDaemon() {
 			client := apimanager.NewAPIManager(ipconfig, primary, secondary, ipquality)
 			dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 			dumper, err := dumper.NewDumperJSON(dbcli)
+			gps := gpsdfetcher.NewGPSDFetcher(cfg.GPSConfig.Timeout)
 			if err != nil {
 				log.Printf("Failed to open database: %v", err)
 			}
-			lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup)
-			locator := whereami.NewLocator(client, dbcli, dumper, lCfg)
+			lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, gpsEnabled)
+			locator := whereami.NewLocator(client, dbcli, dumper, gps, lCfg)
 			locator.Store()
 		})
 		if err != nil {

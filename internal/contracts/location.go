@@ -24,7 +24,15 @@ type Location struct {
 	Vpn         bool           `json:"vpn"`
 	Comment     string         `json:"comment"`
 	Scores      LocationScores `json:"scores"`
+	Gps         GPSReport      `json:"gps"`
 	Map         string         `json:"map"`
+}
+
+type GPSReport struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	Altitude  float64 `json:"altitude"`
+	Url       string  `json:"url"`
 }
 
 type LocationScores struct {
@@ -69,6 +77,10 @@ func (l *Location) Output(categories map[string][]string, orderedCategories []st
 
 			if field == "map" {
 				handleMapField(fieldVal, cyanP, whiteP, l.Latitude, l.Longitude)
+			}
+			if field == "gps" {
+				printStructFields(fieldVal, cyanP, whiteP)
+				continue
 			}
 
 			fieldValue := fieldVal.Interface()

@@ -15,7 +15,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/pressly/goose/v3 v3.19.2
+require (
+	github.com/pressly/goose/v3 v3.19.2
+	github.com/stratoberry/go-gpsd v1.3.0
+)
 
 require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect

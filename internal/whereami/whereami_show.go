@@ -1,6 +1,8 @@
 package whereami
 
 import (
+	"log"
+
 	"github.com/s-yakubovskiy/whereami/internal/common"
 )
 
@@ -16,6 +18,9 @@ var (
 		"Security Assessments": {
 			"vpn", "scores",
 		},
+		"GPS": {
+			"gps",
+		},
 		"Miscellaneous": {
 			"map", "date", "comment",
 		},
@@ -25,6 +30,7 @@ var (
 		"Network Information",
 		"Geographical Information",
 		"Security Assessments",
+		"GPS",
 		"Miscellaneous",
 	}
 )
@@ -38,13 +44,13 @@ func (l *Locator) ShowFull() {
 	var ip string
 	var err error
 
-	if l.iplookup == "" {
+	if l.cfg.IP == "" {
 		ip, err = l.client.GetIP()
 		if err != nil {
 			common.Errorln(err.Error())
 		}
 	} else {
-		ip = l.iplookup
+		ip = l.cfg.IP
 	}
 	// Fetching data from IP API
 	location, err := l.client.GetLocation(ip)
@@ -66,13 +72,23 @@ func (l *Locator) ShowFull() {
 			location.Vpn = true
 		}
 
-		if l.ipquality {
+		if l.cfg.IpQuality {
 			l.client.AddIPQuality(location, ip)
 		}
 
-		// update comment for location
-		location.Comment += ". Using public ip provider: " + l.client.ShowIpProvider()
+		if l.cfg.GPS {
+			// TODO: move to l.client.AddGPSInfo
+			report, err := l.FetchGPSReport()
+			if err != nil {
+				log.Fatal(err)
+			}
+			location.Gps.Altitude = report.Alt
+			location.Gps.Longitude = report.Lon
+			location.Gps.Latitude = report.Lat
+			location.Comment += ". Enriched by GPSD"
+		}
 
+		location.Comment += ". Using public ip provider: " + l.client.ShowIpProvider()
 		location.Output(categories, orderedCategories)
 	}
 }

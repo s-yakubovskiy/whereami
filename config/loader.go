@@ -100,10 +100,10 @@ func (loader *Loader) Load(appConfig *AppConfig) *AppConfig {
 
 	// default configuration paths
 	configPaths := []string{
+		"./config/",
 		"/etc/whereami/",
 		"$HOME/.whereami/",
 		"$HOME/.config/whereami/",
-		// "./config/",
 	}
 	for _, path := range configPaths {
 		v.AddConfigPath(path)

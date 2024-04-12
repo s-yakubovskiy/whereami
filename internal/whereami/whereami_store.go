@@ -25,7 +25,7 @@ func (l *Locator) Store() {
 		if vpn {
 			location.Vpn = true
 		}
-		if l.ipquality {
+		if l.cfg.IpQuality {
 			l.client.AddIPQuality(location, ip)
 		}
 		if err := l.dbclient.StoreLocation(location); err != nil {

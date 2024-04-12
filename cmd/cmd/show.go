@@ -10,6 +10,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/dbclient"
 	"github.com/s-yakubovskiy/whereami/internal/dumper"
 	"github.com/s-yakubovskiy/whereami/internal/whereami"
+	"github.com/s-yakubovskiy/whereami/pkg/gpsdfetcher"
 	"github.com/s-yakubovskiy/whereami/pkg/ipconfig"
 )
 
@@ -18,6 +19,7 @@ var (
 	locationApi string
 	publicIpApi string
 	ipLookup    string
+	gpsEnabled  bool
 )
 
 var showCmd = &cobra.Command{
@@ -42,8 +44,13 @@ var showCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
-		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup)
-		locator := whereami.NewLocator(client, dbcli, dumper, lCfg)
+
+		gps := gpsdfetcher.NewGPSDFetcher(cfg.GPSConfig.Timeout)
+		if cfg.GPSConfig.Enabled {
+			gpsEnabled = true
+		}
+		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, gpsEnabled)
+		locator := whereami.NewLocator(client, dbcli, dumper, gps, lCfg)
 		introduce()
 		if fullShow {
 			locator.ShowFull()
@@ -58,5 +65,6 @@ func init() {
 	showCmd.Flags().StringVarP(&locationApi, "location-api", "l", "", "Select ip location provider: [ipapi, ipdata]")
 	showCmd.Flags().StringVarP(&publicIpApi, "public-ip-api", "p", "", "Select public ip api provider: [ifconfig.me, ipinfo.io, icanhazip.com]")
 	showCmd.Flags().StringVarP(&ipLookup, "ip", "i", "", "Specify public IP to lookup info")
+	showCmd.Flags().BoolVarP(&gpsEnabled, "gps", "", false, "Add experimental GPS intergration [gpsd service should up & running]")
 	rootCmd.AddCommand(showCmd)
 }

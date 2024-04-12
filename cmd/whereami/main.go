@@ -13,8 +13,9 @@ func init() {
 
 // TODO:
 // 1. Update documentation and how-to install guide. Also how-to setup IP Quality with api key
-// 2. Add option to see history (--history 10 shows last ten locations in nice terminal output)
+// 2. Adding experimental flag --gps to add posibility enrich whrmi location output with precise lat & long, altimeter and some other optional stuff
 
 func main() {
+	// fmt.Printf("%+v\n", config.Cfg)
 	cmd.Execute()
 }

@@ -2,6 +2,7 @@ package config
 
 import (
 	"strings"
+	"time"
 )
 
 var Cfg AppConfig
@@ -12,6 +13,7 @@ type AppConfig struct {
 	CrontabTasks    []CrontabTask   `mapstructure:"crontab_tasks" yaml:"crontab_tasks"`
 	MainProvider    string          `mapstructure:"main_provider" yaml:"main_provider"`
 	ProviderConfigs ProviderConfigs `mapstructure:"provider_configs" yaml:"provider_configs"`
+	GPSConfig       GPSConfig       `mapstructure:"gps" yaml:"gps"`
 }
 
 type Database struct {
@@ -31,6 +33,12 @@ type ProviderConfig struct {
 	URL     string `mapstructure:"url"`
 	APIKey  string `mapstructure:"api_key" yaml:"api_key"`
 	Enabled bool   `mapstructure:"enabled"`
+}
+
+type GPSConfig struct {
+	Enabled    bool          `mapstructure:"enabled"`
+	Timeout    time.Duration `mapstructure:"timeout"`
+	GpsdSocket string        `mapstructure:"gpsd_socket"`
 }
 
 type CrontabTask struct {
