@@ -9,14 +9,14 @@ import (
 	"github.com/stratoberry/go-gpsd"
 )
 
-// var _ LocatorInterface = &Locator{}
+var _ LocatorInterface = &apimanager.APIManager{}
 
 type LocatorInterface interface {
 	GetLocation(ip string) (*contracts.Location, error)
 	GetVPN([]string) (bool, error)
 	GetIP() (string, error)
 	ShowIpProvider() string
-	AddIPQuality(*contracts.Location, string) (*contracts.Location, error)
+	AddIPQuality(string) (*contracts.LocationScores, error)
 }
 
 // KeeperInterface defines the interface for database operations

@@ -8,7 +8,7 @@ import (
 	"unicode"
 )
 
-func createMapLocation(lat, long float64) string {
+func CreateMapLocation(lat, long float64) string {
 	mapPattern := "https://www.google.com/maps?q=%f,%f"
 
 	return fmt.Sprintf(mapPattern, lat, long)
@@ -37,7 +37,7 @@ func handleDateField(fieldVal reflect.Value, cyanP func(format string, a ...inte
 func handleMapField(fieldVal reflect.Value, cyanP func(format string, a ...interface{}), whiteP func(format string, a ...interface{}), lat, long float64) {
 	mapVal, isString := fieldVal.Interface().(string)
 	if !isString || mapVal == "" {
-		mapVal = createMapLocation(lat, long)
+		mapVal = CreateMapLocation(lat, long)
 	}
 	cyanP("  map: ")
 	whiteP("%s\n", mapVal)

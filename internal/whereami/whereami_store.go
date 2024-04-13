@@ -25,9 +25,10 @@ func (l *Locator) Store() {
 		if vpn {
 			location.Vpn = true
 		}
-		if l.cfg.IpQuality {
-			l.client.AddIPQuality(location, ip)
-		}
+		// TODO: update it later
+		// if l.cfg.IpQuality {
+		// 	l.client.AddIPQuality(location, ip)
+		// }
 		if err := l.dbclient.StoreLocation(location); err != nil {
 			if err.Error() == "The database is already contains this record." {
 				common.Warnln(err.Error())

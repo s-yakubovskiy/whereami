@@ -1,9 +1,8 @@
 package whereami
 
 import (
-	"log"
-
 	"github.com/s-yakubovskiy/whereami/internal/common"
+	"github.com/s-yakubovskiy/whereami/internal/contracts"
 )
 
 var (
@@ -48,47 +47,91 @@ func (l *Locator) ShowFull() {
 		ip, err = l.client.GetIP()
 		if err != nil {
 			common.Errorln(err.Error())
+			return
 		}
 	} else {
 		ip = l.cfg.IP
 	}
-	// Fetching data from IP API
-	location, err := l.client.GetLocation(ip)
-	if err != nil {
-		common.Errorln(err.Error())
+
+	// Create channels for concurrent fetching
+	locationChan := make(chan *contracts.Location, 1)
+	qualityChan := make(chan *contracts.LocationScores, 1)
+	gpsReportChan := make(chan *contracts.GPSReport, 1)
+	errorChan := make(chan error, 3) // to handle errors from goroutines
+
+	// Fetching data from IP API concurrently
+	go func() {
+		location, err := l.client.GetLocation(ip)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+		locationChan <- location
+	}()
+
+	// Fetch IP Quality scores concurrently
+	if l.cfg.IpQuality {
+		go func() {
+			quality, err := l.client.AddIPQuality(ip)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+			qualityChan <- quality
+		}()
+	} else {
+		close(qualityChan) // Close the channel if not used
 	}
-	if location != nil && ip != "" {
-		vpninterfaces, err := l.dbclient.GetVPNInterfaces()
-		if err != nil {
-			common.Warnln(err.Error())
-		}
 
-		vpn, err := l.client.GetVPN(vpninterfaces)
-		if err != nil {
-			common.Warnln(err.Error())
-		}
-
-		if vpn {
-			location.Vpn = true
-		}
-
-		if l.cfg.IpQuality {
-			l.client.AddIPQuality(location, ip)
-		}
-
-		if l.cfg.GPS {
-			// TODO: move to l.client.AddGPSInfo
+	// Fetch GPS report concurrently if enabled
+	if l.cfg.GPS {
+		go func() {
 			report, err := l.FetchGPSReport()
 			if err != nil {
-				log.Fatal(err)
+				errorChan <- err
+				return
 			}
-			location.Gps.Altitude = report.Alt
-			location.Gps.Longitude = report.Lon
-			location.Gps.Latitude = report.Lat
-			location.Comment += ". Enriched by GPSD"
-		}
-
-		location.Comment += ". Using public ip provider: " + l.client.ShowIpProvider()
-		location.Output(categories, orderedCategories)
+			gpsReportChan <- contracts.GPSReportDTO(report)
+		}()
+	} else {
+		close(gpsReportChan) // Close the channel if not used
 	}
+
+	// Wait for all results
+	location := <-locationChan
+	quality := <-qualityChan
+	gpsReport := <-gpsReportChan
+
+	// Check for any errors from goroutines
+	close(errorChan)
+	for err := range errorChan {
+		common.Errorln(err.Error())
+		return
+	}
+
+	// VPN checking is synchronous
+	vpninterfaces, err := l.dbclient.GetVPNInterfaces()
+	if err != nil {
+		common.Warnln(err.Error())
+	}
+
+	vpn, err := l.client.GetVPN(vpninterfaces)
+	if err != nil {
+		common.Warnln(err.Error())
+	}
+
+	if vpn {
+		location.Vpn = true
+	}
+
+	// Combine all data into the final Location struct
+	if quality != nil {
+		location.Scores = *quality
+	}
+	if gpsReport != nil {
+		location.Gps = *gpsReport
+	}
+	location.Comment += ". Using public ip provider: " + l.client.ShowIpProvider()
+
+	location.Output(categories, orderedCategories)
 }

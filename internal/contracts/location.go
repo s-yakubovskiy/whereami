@@ -46,6 +46,10 @@ type LocationScores struct {
 	BotStatus   bool   `json:"bot_status"`
 }
 
+func NewLocationScores() *LocationScores {
+	return &LocationScores{}
+}
+
 // Output reworked to support ordered categories with conditional field output and correct struct handling
 func (l *Location) Output(categories map[string][]string, orderedCategories []string) {
 	val := reflect.ValueOf(*l)

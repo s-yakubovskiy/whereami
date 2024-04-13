@@ -81,6 +81,6 @@ func (l *APIManager) GetVPN(vpninterfaces []string) (bool, error) {
 }
 
 // AddIPQuality enriches the provided location with quality metrics for the given IP address, using the IP quality service.
-func (l *APIManager) AddIPQuality(location *contracts.Location, ip string) (*contracts.Location, error) {
-	return l.ipquality.AddIPQuality(location, ip)
+func (l *APIManager) AddIPQuality(ip string) (*contracts.LocationScores, error) {
+	return l.ipquality.AddIPQuality(ip)
 }

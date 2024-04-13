@@ -2,7 +2,6 @@ package apimanager
 
 import (
 	"fmt"
-	"strconv"
 
 	ipdata "github.com/ipdata/go"
 	"github.com/s-yakubovskiy/whereami/internal/common"
@@ -59,35 +58,13 @@ func ConvertIpDataToLocation(ip ipdata.IP) (*contracts.Location, error) {
 	}, nil
 }
 
-func ConvertIpQualityScoreToLocation(ip *ipqualityscore.IpQualityScoreLocation) (*contracts.Location, error) {
-	// Check for nil pointers in fields that are pointers in the source struct
-	return &contracts.Location{
-		CountryCode: ip.CountryCode,
-		Region:      ip.Region,
-		City:        ip.City,
-		Timezone:    ip.Timezone,
-		Zip:         ip.ZipCode,
-		Flag:        common.CountryCodeToEmoji(ip.CountryCode),
-		Isp:         ip.ISP, // Assuming ASN Name represents the ISP
-		Asn:         strconv.Itoa(ip.ASN),
-		Latitude:    ip.Latitude,
-		Longitude:   ip.Longitude,
-		Date:        "", // Set this to current date or as required
-		Vpn:         false,
-		// Scores: ip.IP,
-		Comment: "Fetched with ipqualityscore provider",
-	}, nil
-}
-
-func EnrichLocationWithQualityScore(location *contracts.Location, ip *ipqualityscore.IpQualityScoreLocation) (*contracts.Location, error) {
-	location.Scores.FraudScore = ip.FraudScore
-	location.Scores.Host = ip.Host
-	location.Scores.IsCrawler = ip.IsCrawler
-	location.Scores.BotStatus = ip.BotStatus
-	location.Scores.Tor = ip.Tor
-	location.Scores.Proxy = ip.Proxy
-	location.Scores.VPN = ip.VPN
-	location.Comment = location.Comment + ". Updated with ipqualityscore provider"
-
+func EnrichLocationWithQualityScore(location *contracts.LocationScores, ip *ipqualityscore.IpQualityScoreLocation) (*contracts.LocationScores, error) {
+	location.FraudScore = ip.FraudScore
+	location.Host = ip.Host
+	location.IsCrawler = ip.IsCrawler
+	location.BotStatus = ip.BotStatus
+	location.Tor = ip.Tor
+	location.Proxy = ip.Proxy
+	location.VPN = ip.VPN
 	return location, nil
 }

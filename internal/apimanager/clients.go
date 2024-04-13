@@ -12,7 +12,7 @@ var _ IPQualityInterface = &IpQualityScoreClient{}
 
 // IPQualityInterface defines a method for adding quality metrics to a given IP location.
 type IPQualityInterface interface {
-	AddIPQuality(*contracts.Location, string) (*contracts.Location, error)
+	AddIPQuality(ip string) (*contracts.LocationScores, error)
 }
 
 // IpApiClient wraps the ipapi client and implements the IPLocationInterface for getting location information.
@@ -73,10 +73,12 @@ func NewIpQualityScoreClient(cfg config.ProviderConfig) (*IpQualityScoreClient, 
 }
 
 // AddIPQuality uses the ipqualityscore client to lookup the quality score of the given IP and enriches the Location struct with this data.
-func (l *IpQualityScoreClient) AddIPQuality(location *contracts.Location, ip string) (*contracts.Location, error) {
+func (l *IpQualityScoreClient) AddIPQuality(ip string) (*contracts.LocationScores, error) {
+	location := contracts.NewLocationScores()
+
 	qualityScore, err := l.client.Lookup(ip)
 	if err != nil {
-		return location, err
+		return nil, err
 	}
 
 	return EnrichLocationWithQualityScore(location, qualityScore)
