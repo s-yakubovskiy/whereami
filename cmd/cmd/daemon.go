@@ -43,6 +43,9 @@ func startDaemon() {
 			if err != nil {
 				log.Printf("Failed to open database: %v", err)
 			}
+			if cfg.GPSConfig.Enabled {
+				gpsEnabled = true
+			}
 			lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, gpsEnabled)
 			locator := whereami.NewLocator(client, dbcli, dumper, gps, lCfg)
 			locator.Store()
