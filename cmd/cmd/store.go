@@ -29,9 +29,12 @@ var storeCmd = &cobra.Command{
 		client := apimanager.NewAPIManager(ipconfig, primary, secondary, ipquality)
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 		dumper, err := dumper.NewDumperJSON(dbcli)
-		gps := gpsdfetcher.NewGPSDFetcher(cfg.GPSConfig.Timeout)
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
+		}
+		gps := gpsdfetcher.NewGPSDFetcher(cfg.GPSConfig.Timeout)
+		if cfg.GPSConfig.Enabled {
+			gpsEnabled = true
 		}
 		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, gpsEnabled)
 		locator := whereami.NewLocator(client, dbcli, dumper, gps, lCfg)

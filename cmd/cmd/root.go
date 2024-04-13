@@ -69,6 +69,9 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
+		if cfg.GPSConfig.Enabled {
+			gpsEnabled = true
+		}
 		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, gpsEnabled)
 		locator := whereami.NewLocator(client, dbcli, dumper, gps, lCfg)
 		if fullShow {
@@ -85,5 +88,6 @@ func init() {
 	rootCmd.Flags().StringVarP(&publicIpApi, "public-ip-api", "p", "", "Select public ip api provider: [ifconfig.me, ipinfo.io, icanhazip.com]")
 	rootCmd.Flags().StringVarP(&ipLookup, "ip", "", "", "Specify public IP to lookup info")
 	rootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "Display application version")
+	rootCmd.Flags().BoolVarP(&gpsEnabled, "gps", "", false, "Add experimental GPS intergration [gpsd service should up & running]")
 	//
 }
