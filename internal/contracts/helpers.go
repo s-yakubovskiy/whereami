@@ -63,21 +63,10 @@ func printStructFields(val reflect.Value, cyanP func(format string, a ...interfa
 		// if isZeroValue(fieldValue) {
 		// 	continue // Skip this iteration if the value is zero
 		// }
-		cyanP("  %s: ", field.Name)
+		cyanP("  %s: ", capitalizeFirst(field.Name))
 		whiteP("%v\n", fieldValue.Interface())
 	}
 }
-
-// // printStructFields handles printing each field of a struct value.
-// func printStructFields(val reflect.Value, cyanP func(format string, a ...interface{}), whiteP func(format string, a ...interface{})) {
-// 	lsTyp := val.Type()
-// 	for i := 0; i < val.NumField(); i++ {
-// 		field := lsTyp.Field(i)
-// 		fieldValue := val.Field(i)
-// 		cyanP("  %s: ", field.Name)
-// 		whiteP("%v\n", fieldValue.Interface())
-// 	}
-// }
 
 func capitalizeFirst(s string) string {
 	if s == "" {
@@ -85,8 +74,11 @@ func capitalizeFirst(s string) string {
 	}
 	rs := []rune(s)
 	rs[0] = unicode.ToUpper(rs[0])
-	return s
-	// return string(rs)
+	if len(rs) <= 3 {
+		return strings.ToUpper(string(rs))
+	}
+	// return s
+	return string(rs)
 }
 
 // findField locates a field by name within a struct, accounting for case insensitivity.

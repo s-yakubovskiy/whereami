@@ -1,6 +1,9 @@
 package whereami
 
 import (
+	"context"
+	"time"
+
 	"github.com/s-yakubovskiy/whereami/internal/common"
 	"github.com/s-yakubovskiy/whereami/internal/contracts"
 )
@@ -15,7 +18,7 @@ var (
 			"ip", "isp", "asn", "flag",
 		},
 		"Security Assessments": {
-			"vpn", "scores",
+			"vpnInterface", "scores",
 		},
 		"GPS": {
 			"gps",
@@ -53,76 +56,20 @@ func (l *Locator) ShowFull() {
 		ip = l.cfg.IP
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel() // Ensures all paths cancel the context to prevent leaks
+
 	// Create channels for concurrent fetching
 	locationChan := make(chan *contracts.Location, 1)
 	qualityChan := make(chan *contracts.LocationScores, 1)
 	gpsReportChan := make(chan *contracts.GPSReport, 1)
 	errorChan := make(chan error, 3) // to handle errors from goroutines
 
-	// Fetching data from IP API concurrently
-	go func() {
-		location, err := l.client.GetLocation(ip)
-		if err != nil {
-			errorChan <- err
-			return
-		}
-		locationChan <- location
-	}()
+	// Setting up fetch routines
+	setupFetchRoutines(ctx, ip, locationChan, qualityChan, gpsReportChan, errorChan, l)
 
-	// Fetch IP Quality scores concurrently
-	if l.cfg.IpQuality {
-		go func() {
-			quality, err := l.client.AddIPQuality(ip)
-			if err != nil {
-				errorChan <- err
-				return
-			}
-			qualityChan <- quality
-		}()
-	} else {
-		close(qualityChan) // Close the channel if not used
-	}
-
-	// Fetch GPS report concurrently if enabled
-	if l.cfg.GPS {
-		go func() {
-			report, err := l.FetchGPSReport()
-			if err != nil {
-				errorChan <- err
-				return
-			}
-			gpsReportChan <- contracts.GPSReportDTO(report)
-		}()
-	} else {
-		close(gpsReportChan) // Close the channel if not used
-	}
-
-	// Wait for all results
-	location := <-locationChan
-	quality := <-qualityChan
-	gpsReport := <-gpsReportChan
-
-	// Check for any errors from goroutines
-	close(errorChan)
-	for err := range errorChan {
-		common.Errorln(err.Error())
-		return
-	}
-
-	// VPN checking is synchronous
-	vpninterfaces, err := l.dbclient.GetVPNInterfaces()
-	if err != nil {
-		common.Warnln(err.Error())
-	}
-
-	vpn, err := l.client.GetVPN(vpninterfaces)
-	if err != nil {
-		common.Warnln(err.Error())
-	}
-
-	if vpn {
-		location.Vpn = true
-	}
+	// Collect results and handle possible timeouts
+	location, quality, gpsReport := collectResults(ctx, locationChan, qualityChan, gpsReportChan, errorChan)
 
 	// Combine all data into the final Location struct
 	if quality != nil {
@@ -132,6 +79,5 @@ func (l *Locator) ShowFull() {
 		location.Gps = *gpsReport
 	}
 	location.Comment += ". Using public ip provider: " + l.client.ShowIpProvider()
-
 	location.Output(categories, orderedCategories)
 }
