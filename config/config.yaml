@@ -29,7 +29,7 @@ database:
 # NOTE: gps is experimantal feature which need up & running gpsd.service on your host
 gps:
   enabled: false
-  timeout: 25s
+  timeout: 15s
   gpsd_socket: /var/run/gpsd.sock
 
 

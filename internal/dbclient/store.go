@@ -29,20 +29,23 @@ func (s *LocationKeeper) StoreLocation(location *contracts.Location) error {
 	// Insert the new location
 	stmt, err := tx.Prepare(`
         INSERT INTO locations 
-        (ip, country, countryCode, region, regionCode, city, timezone, zip, flag, isp, asn, latitude, longitude, date, vpn)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+        (ip, country, countryCode, region, regionCode, city, timezone, zip, flag, isp, asn, latitude, longitude, date, vpn, gps_latitude, gps_longitude, gps_altitude, gps_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 	defer stmt.Close()
 
-	res, err := stmt.Exec(location.IP, location.Country, location.CountryCode, location.Region, location.RegionCode, location.City, location.Timezone, location.Zip, location.Flag, location.Isp, location.Asn, location.Latitude, location.Longitude, location.Date, location.Vpn)
+	res, err := stmt.Exec(
+		location.IP, location.Country, location.CountryCode, location.Region, location.RegionCode,
+		location.City, location.Timezone, location.Zip, location.Flag, location.Isp, location.Asn,
+		location.Latitude, location.Longitude, location.Date, location.Vpn,
+		location.Gps.Latitude, location.Gps.Longitude, location.Gps.Altitude, location.Gps.Url)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-
 	// Get the last inserted ID
 	lastID, err := res.LastInsertId()
 	if err != nil {

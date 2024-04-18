@@ -62,12 +62,14 @@ func setupFetchRoutines(ctx context.Context, ip string, locationChan chan *contr
 			report, err := l.FetchGPSReport()
 			if err != nil || report == nil {
 				errorChan <- fmt.Errorf("GPS error: %w", err)
+				close(gpsReportChan) // Ensure to close the channel on failure
 				return
 			}
 			select {
 			case gpsReportChan <- contracts.GPSReportDTO(report):
 			case <-ctx.Done():
 				errorChan <- fmt.Errorf("GPS fetch canceled")
+				close(gpsReportChan) // Ensure to close the channel if context is done
 			}
 		}()
 	} else {
@@ -75,34 +77,41 @@ func setupFetchRoutines(ctx context.Context, ip string, locationChan chan *contr
 	}
 }
 
-func collectResults(ctx context.Context, locationChan chan *contracts.Location, qualityChan chan *contracts.LocationScores, gpsReportChan chan *contracts.GPSReport, errorChan chan error) (*contracts.Location, *contracts.LocationScores, *contracts.GPSReport) {
+func collectResults(ctx context.Context, locationChan chan *contracts.Location, qualityChan chan *contracts.LocationScores, gpsReportChan chan *contracts.GPSReport, errorChan chan error, gpsEnabled bool) (*contracts.Location, *contracts.LocationScores, *contracts.GPSReport) {
 	var location *contracts.Location
 	var quality *contracts.LocationScores
 	var gpsReport *contracts.GPSReport
 
 	completed := 0
-	total := 3 // Adjust based on active operations
+	total := 2 // default for when GPS is not enabled
+	if gpsEnabled {
+		total = 3 // adjust total if GPS is enabled
+	}
+
 	for completed < total {
 		select {
-		case loc := <-locationChan:
-			location = loc
-			completed++
-		case qual := <-qualityChan:
-			quality = qual
-			completed++
-		case gps := <-gpsReportChan:
-			gpsReport = gps
-			completed++
+		case loc, ok := <-locationChan:
+			if ok {
+				location = loc
+				completed++
+			}
+		case qual, ok := <-qualityChan:
+			if ok {
+				quality = qual
+				completed++
+			}
+		case gps, ok := <-gpsReportChan:
+			if ok {
+				gpsReport = gps
+				completed++
+			} else if gpsEnabled {
+				// GPS channel closed due to error, proceed without GPS data
+				completed++
+			}
 		case err := <-errorChan:
-			completed++
 			common.Errorln("Operation error: " + err.Error())
 		case <-ctx.Done():
 			common.Warnln("Timeout or context cancellation / " + ctx.Err().Error())
-			close(errorChan)
-			// for err := range errorChan {
-			// 	common.Errorln(err.Error())
-			// }
-			// log.Fatalf("%+v\n", errorChan)
 			return location, quality, gpsReport // Return whatever was fetched
 		}
 	}

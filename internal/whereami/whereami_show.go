@@ -37,6 +37,8 @@ var (
 	}
 )
 
+var ASYNC_TIMEOUT = 35 * time.Second
+
 func (l *Locator) Show() {
 	// NOTE: right now no difference between full and short `show` output
 	l.ShowFull()
@@ -56,7 +58,7 @@ func (l *Locator) ShowFull() {
 		ip = l.cfg.IP
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ASYNC_TIMEOUT)
 	defer cancel() // Ensures all paths cancel the context to prevent leaks
 
 	// Create channels for concurrent fetching
@@ -69,7 +71,7 @@ func (l *Locator) ShowFull() {
 	setupFetchRoutines(ctx, ip, locationChan, qualityChan, gpsReportChan, errorChan, l)
 
 	// Collect results and handle possible timeouts
-	location, quality, gpsReport := collectResults(ctx, locationChan, qualityChan, gpsReportChan, errorChan)
+	location, quality, gpsReport := collectResults(ctx, locationChan, qualityChan, gpsReportChan, errorChan, l.cfg.GPS)
 
 	// Combine all data into the final Location struct
 	if quality != nil {
