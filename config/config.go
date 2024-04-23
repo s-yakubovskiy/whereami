@@ -26,19 +26,23 @@ type ProviderConfigs struct {
 	IpApi            ProviderConfig `mapstructure:"ipapi"`
 	IpData           ProviderConfig `mapstructure:"ipdata"`
 	IpQualityScore   ProviderConfig `mapstructure:"ipqualityscore"`
+	OpenWeather      ProviderConfig `mapstructure:"openweather"`
 	PublicIpProvider string         `mapstructure:"public_ip_provider" yaml:"public_ip_provider"`
 }
 
 type ProviderConfig struct {
+	Name    string `mapstructure:"name"`
 	URL     string `mapstructure:"url"`
 	APIKey  string `mapstructure:"api_key" yaml:"api_key"`
 	Enabled bool   `mapstructure:"enabled"`
 }
 
 type GPSConfig struct {
-	Enabled    bool          `mapstructure:"enabled"`
-	Timeout    time.Duration `mapstructure:"timeout"`
-	GpsdSocket string        `mapstructure:"gpsd_socket"`
+	Enabled      bool          `mapstructure:"enabled"`
+	Provider     string        `mapstructure:"provider"`
+	Timeout      time.Duration `mapstructure:"timeout"`
+	GpsdDumpFile string        `mapstructure:"gpsd_dump_file"`
+	GpsdSocket   string        `mapstructure:"gpsd_socket"`
 }
 
 type CrontabTask struct {

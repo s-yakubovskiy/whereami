@@ -18,5 +18,6 @@ func init() {
 
 func main() {
 	// fmt.Printf("%+v\n", config.Cfg)
+	// os.Exit(0)
 	cmd.Execute()
 }

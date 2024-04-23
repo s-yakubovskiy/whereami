@@ -21,6 +21,7 @@ require (
 )
 
 require (
+	github.com/electricbubble/gadb v0.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/subcommands v1.2.0 // indirect

@@ -4,15 +4,23 @@ main_provider: "ipdata"
 
 provider_configs:
   ipapi:
+    name: ipapi
     url: "http://ip-api.com/json/"
     api_key: ""
     enabled: true
   ipdata:
+    name: ipdata
     url: "https://api.ipdata.co"
     api_key: ""
     enabled: true
   ipqualityscore:
+    name: ipqualityscore
     url: "https://ipqualityscore.com/api/json/ip"
+    api_key: ""
+    enabled: true
+  openweather:
+    name: openweather
+    url: "http://api.openweathermap.org/data/2.5/weather"
     api_key: ""
     enabled: true
   public_ip_provider: ifconfig.me
@@ -29,8 +37,10 @@ database:
 # NOTE: gps is experimantal feature which need up & running gpsd.service on your host
 gps:
   enabled: false
-  timeout: 15s
-  gpsd_socket: /var/run/gpsd.sock
+  provider: adb # gpsd # file
+  timeout: 28s
+  gpsd_socket: "/var/run/gpsd.sock"
+  gpsd_dump_file: /opt/gps/data/gpsdata.json
 
 
 crontab_tasks:

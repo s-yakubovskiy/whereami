@@ -9,35 +9,12 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/apimanager"
 	"github.com/s-yakubovskiy/whereami/internal/dbclient"
 	"github.com/s-yakubovskiy/whereami/internal/dumper"
+	"github.com/s-yakubovskiy/whereami/internal/servicefactory"
 	"github.com/s-yakubovskiy/whereami/internal/whereami"
 	"github.com/s-yakubovskiy/whereami/pkg/gpsdfetcher"
 	"github.com/s-yakubovskiy/whereami/pkg/ipconfig"
 	"github.com/spf13/cobra"
 )
-
-func getLocationClient(provider string) (apimanager.IPLocationInterface, apimanager.IPLocationInterface, apimanager.IPQualityInterface, error) {
-	switch provider {
-	case "ipapi":
-		primary, err := apimanager.NewIpApiClient(config.Cfg.ProviderConfigs.IpApi)
-		secondary, err := apimanager.NewIpDataClient(config.Cfg.ProviderConfigs.IpData)
-		if config.Cfg.ProviderConfigs.IpQualityScore.Enabled {
-			ipquality, err := apimanager.NewIpQualityScoreClient(config.Cfg.ProviderConfigs.IpQualityScore)
-			return primary, secondary, ipquality, err
-		}
-		return primary, secondary, nil, err
-	case "ipdata":
-		primary, err := apimanager.NewIpDataClient(config.Cfg.ProviderConfigs.IpData)
-		secondary, err := apimanager.NewIpApiClient(config.Cfg.ProviderConfigs.IpApi)
-		if config.Cfg.ProviderConfigs.IpQualityScore.Enabled {
-			ipquality, err := apimanager.NewIpQualityScoreClient(config.Cfg.ProviderConfigs.IpQualityScore)
-			return primary, secondary, ipquality, err
-		}
-		return primary, secondary, nil, err
-	default:
-		log.Fatalf("Unknown provider set: %+v\n", provider)
-		return nil, nil, nil, fmt.Errorf("unknown provider: %s", provider)
-	}
-}
 
 var rootCmd = &cobra.Command{
 	Use:   "whereami",
@@ -59,20 +36,49 @@ var rootCmd = &cobra.Command{
 			cfg.ProviderConfigs.PublicIpProvider = publicIpApi
 		}
 
-		ipconfig, err := ipconfig.NewIPConfig(cfg.ProviderConfigs.PublicIpProvider)
-		primary, secondary, ipquality, err := getLocationClient(cfg.MainProvider)
+		factory := &servicefactory.DefaultServiceFactory{}
 
-		client := apimanager.NewAPIManager(ipconfig, primary, secondary, ipquality)
+		ipconfig, err := ipconfig.NewIPConfig(cfg.ProviderConfigs.PublicIpProvider)
+		if err != nil {
+			log.Fatalf("Failed to create IP configuration: %v", err)
+		}
+
+		ipapi, err := factory.CreateLocationService(cfg.ProviderConfigs.IpApi)
+		if err != nil {
+			log.Fatalf("Failed to create primary location service: %v", err)
+		}
+		ipdata, err := factory.CreateLocationService(cfg.ProviderConfigs.IpData)
+		if err != nil {
+			log.Fatalf("Failed to create secondary location service: %v", err)
+		}
+		ipquality, err := factory.CreateQualityService(cfg.ProviderConfigs.IpQualityScore)
+		if err != nil {
+			log.Fatalf("Failed to create IP quality service: %v", err)
+		}
+
+		client := apimanager.NewAPIManager(ipconfig, ipapi, ipdata, ipquality)
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
-		dumper, err := dumper.NewDumperJSON(dbcli)
-		gps := gpsdfetcher.NewGPSDFetcher(cfg.GPSConfig.Timeout)
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
-		if cfg.GPSConfig.Enabled {
-			gpsEnabled = true
+		dumper, err := dumper.NewDumperJSON(dbcli)
+		if err != nil {
+			log.Fatalf("Failed to create dumper: %v", err)
 		}
-		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, gpsEnabled)
+
+		var gps gpsdfetcher.GPSInterface
+		if cfg.GPSConfig.Enabled || gpsEnabled {
+			cfg.GPSConfig.Enabled = true
+			if gpsProvider == "adb" {
+				gps = gpsdfetcher.NewGPSAdbFetcher()
+			} else if gpsProvider == "file" {
+				gps = gpsdfetcher.NewGPSDFileFetcher(cfg.GPSConfig.Timeout)
+			} else {
+				gps = gpsdfetcher.NewGPSDFetcher(cfg.GPSConfig.Timeout)
+			}
+		}
+
+		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, cfg.GPSConfig.Enabled)
 		locator := whereami.NewLocator(client, dbcli, dumper, gps, lCfg)
 		if fullShow {
 			locator.ShowFull()
@@ -84,10 +90,10 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.Flags().BoolVarP(&fullShow, "full", "f", false, "Display full output")
-	rootCmd.Flags().StringVarP(&locationApi, "location-api", "l", "", "Select ip location provider: [ipapi, ipdata]")
-	rootCmd.Flags().StringVarP(&publicIpApi, "public-ip-api", "p", "", "Select public ip api provider: [ifconfig.me, ipinfo.io, icanhazip.com]")
-	rootCmd.Flags().StringVarP(&ipLookup, "ip", "", "", "Specify public IP to lookup info")
 	rootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "Display application version")
-	rootCmd.Flags().BoolVarP(&gpsEnabled, "gps", "", false, "Add experimental GPS intergration [gpsd service should up & running]")
-	//
+	rootCmd.Flags().BoolVarP(&gpsEnabled, "gps", "", false, "Add experimental GPS integration [gpsd service should be up & running]")
+	rootCmd.Flags().StringVarP(&locationApi, "location-api", "l", "", "Select IP location provider: [ipapi, ipdata]")
+	rootCmd.Flags().StringVarP(&publicIpApi, "public-ip-api", "p", "", "Select public IP API provider: [ifconfig.me, ipinfo.io, icanhazip.com]")
+	rootCmd.Flags().StringVarP(&gpsProvider, "gps-provider", "g", "", "Select GPS provider: [adb, file, gpsd (default)]")
+	rootCmd.Flags().StringVarP(&ipLookup, "ip", "", "", "Specify public IP to lookup info")
 }

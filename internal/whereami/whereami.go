@@ -5,7 +5,6 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/contracts"
 	"github.com/s-yakubovskiy/whereami/internal/dbclient"
 	"github.com/s-yakubovskiy/whereami/internal/dumper"
-	"github.com/s-yakubovskiy/whereami/pkg/gpsdfetcher"
 	"github.com/stratoberry/go-gpsd"
 )
 
@@ -55,7 +54,7 @@ func NewConfig(ipquality bool, ip string, gps bool) *Config {
 	}
 }
 
-func NewLocator(api *apimanager.APIManager, dbapi *dbclient.LocationKeeper, dumper *dumper.DumperJSON, gps *gpsdfetcher.GPSDFetcher, cfg *Config) *Locator {
+func NewLocator(api *apimanager.APIManager, dbapi *dbclient.LocationKeeper, dumper *dumper.DumperJSON, gps GPSInterface, cfg *Config) *Locator {
 	return &Locator{
 		client:   api,
 		dbclient: dbapi,

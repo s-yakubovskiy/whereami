@@ -48,6 +48,12 @@ func (l *Locator) ShowFull() {
 	var ip string
 	var err error
 
+	// rep, err := l.FetchGPSReport()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Printf("%+v\n", rep)
+	// os.Exit(8)
 	if l.cfg.IP == "" {
 		ip, err = l.client.GetIP()
 		if err != nil {

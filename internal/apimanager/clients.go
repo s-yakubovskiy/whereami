@@ -8,12 +8,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/pkg/ipqualityscore"
 )
 
-var _ IPQualityInterface = &IpQualityScoreClient{}
-
-// IPQualityInterface defines a method for adding quality metrics to a given IP location.
-type IPQualityInterface interface {
-	AddIPQuality(ip string) (*contracts.LocationScores, error)
-}
+var _ contracts.IPQualityInterface = &IpQualityScoreClient{}
 
 // IpApiClient wraps the ipapi client and implements the IPLocationInterface for getting location information.
 type IpApiClient struct {

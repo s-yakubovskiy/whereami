@@ -10,27 +10,16 @@ import (
 	"github.com/vishvananda/netlink"
 )
 
-// IPConfigInterface defines the method for retrieving the current IP address.
-type IPConfigInterface interface {
-	GetIP() (string, error)
-	ShowIpProvider() string
-}
-
-// IPLocationInterface defines the method for retrieving the geographical location of an IP address.
-type IPLocationInterface interface {
-	GetLocation(ip string) (*contracts.Location, error)
-}
-
 // APIManager orchestrates operations related to IP configurations, IP location lookups, and IP quality assessments.
 type APIManager struct {
-	ipconfig  IPConfigInterface
-	primary   IPLocationInterface
-	secondary IPLocationInterface
-	ipquality IPQualityInterface
+	ipconfig  contracts.IPConfigInterface
+	primary   contracts.IPLocationInterface
+	secondary contracts.IPLocationInterface
+	ipquality contracts.IPQualityInterface
 }
 
 // NewAPIManager creates a new APIManager with specified IP configuration, primary and secondary location services, and an IP quality service.
-func NewAPIManager(ip *ipconfig.IPConfig, primary, secondary IPLocationInterface, ipquality IPQualityInterface) *APIManager {
+func NewAPIManager(ip *ipconfig.IPConfig, primary, secondary contracts.IPLocationInterface, ipquality contracts.IPQualityInterface) *APIManager {
 	return &APIManager{
 		ipconfig:  ip,
 		primary:   primary,
