@@ -23,11 +23,17 @@ provider_configs:
     url: "http://api.openweathermap.org/data/2.5/weather"
     api_key: ""
     enabled: true
+  ifconfig:
+    name: ifconfig # ipapi.io # icanhazip.com
+    url: "http://ifconfig.me/all.json"
+    api_key: ""
+    enabled: true
+  ipapi.io:
+    name: ifconfig # ipapi.io # icanhazip.com
+    url: "http://ifconfig.me/all.json"
+    api_key: ""
+    enabled: true
   public_ip_provider: ifconfig.me
-  # NOTE: also valid to use
-  # ifconfig.me
-  # ipapi.io
-  # icanhazip.com
 
 database:
   enabled: true

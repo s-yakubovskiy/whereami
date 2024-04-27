@@ -10,7 +10,6 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/servicefactory"
 	"github.com/s-yakubovskiy/whereami/internal/whereami"
 	"github.com/s-yakubovskiy/whereami/pkg/gpsdfetcher"
-	"github.com/s-yakubovskiy/whereami/pkg/ipconfig"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +37,7 @@ var showCmd = &cobra.Command{
 
 		factory := &servicefactory.DefaultServiceFactory{}
 
-		ipconfig, err := ipconfig.NewIPConfig(cfg.ProviderConfigs.PublicIpProvider)
+		ifconfig, err := factory.CreateIpProviderService(cfg.ProviderConfigs.Ifconfig)
 		if err != nil {
 			log.Fatalf("Failed to create IP configuration: %v", err)
 		}
@@ -56,7 +55,7 @@ var showCmd = &cobra.Command{
 			log.Fatalf("Failed to create IP quality service: %v", err)
 		}
 
-		client := apimanager.NewAPIManager(ipconfig, ipapi, ipdata, ipquality)
+		client := apimanager.NewAPIManager(ifconfig, ipapi, ipdata, ipquality)
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)

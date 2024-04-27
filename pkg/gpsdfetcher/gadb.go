@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/electricbubble/gadb"
+	"github.com/s-yakubovskiy/whereami/pkg/netscan"
 	"github.com/stratoberry/go-gpsd"
 )
 
@@ -28,18 +29,59 @@ func (s *GPSAdbFetcher) Close() error {
 	return nil
 }
 
+func getAdbHost() string {
+	scanner := netscan.NewTCPScanner(500 * time.Millisecond)
+	subnet, err := scanner.GetSubnets()
+	if err != nil {
+		log.Fatalf("%+v: couldn't get a wireless lan subnet to scan", err)
+	}
+
+	openHosts := scanner.ScanSubnet(subnet[0], 53)
+	for _, host := range openHosts {
+		fmt.Printf("%s:53 is open\n", host)
+		return host
+	}
+	return ""
+	// return openHosts[0], nil
+}
+
+func (s *GPSAdbFetcher) connectRemoteDevice() {
+	if err := s.dev.EnableAdbOverTCP(5555); err != nil {
+		log.Println(err)
+	}
+	adbHost := getAdbHost()
+	log.Println(adbHost)
+	out, err := s.dev.RunShellCommand("connect", "192.168.130.237:5555")
+	fmt.Printf("%+v\n", out)
+	fmt.Printf("%+v\n", err)
+}
+
 func (s *GPSAdbFetcher) Connect() error {
 	adbClient, err := gadb.NewClient()
 	checkErr(err, "fail to connect adb server")
 
 	devices, err := adbClient.DeviceList()
+	if len(devices) > 1 {
+		log.Println("don't need to do anything here. More than one devices available")
+	}
 	checkErr(err)
 
 	if len(devices) == 0 {
+		log.Println(getAdbHost())
 		log.Fatalln("list of devices is empty")
 	}
 
 	s.dev = &devices[0]
+
+	isUsb, _ := devices[0].IsUsb()
+	if len(devices) == 1 && isUsb {
+		log.Println("we got usb device here")
+		s.connectRemoteDevice()
+	}
+	for _, device := range devices {
+		log.Println(device.Serial())
+	}
+	// os.Exit(1)
 
 	// userHomeDir, _ := os.UserHomeDir()
 
@@ -52,6 +94,7 @@ func (s *GPSAdbFetcher) Connect() error {
 
 func (s *GPSAdbFetcher) Fetch() (*gpsd.TPVReport, error) {
 	shellOutput, err := s.dev.RunShellCommand("dumpsys location")
+	// log.Fatalln(shellOutput)
 	if err != nil {
 		log.Fatalf("error running shell command: %v", err)
 	}

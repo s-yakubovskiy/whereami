@@ -5,6 +5,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/config"
 	"github.com/s-yakubovskiy/whereami/internal/contracts"
 	"github.com/s-yakubovskiy/whereami/pkg/ipapi"
+	"github.com/s-yakubovskiy/whereami/pkg/ipprovider"
 	"github.com/s-yakubovskiy/whereami/pkg/ipqualityscore"
 )
 
@@ -54,6 +55,7 @@ func (l *IpDataClient) GetLocation(ip string) (*contracts.Location, error) {
 	return ConvertIpDataToLocation(data)
 }
 
+// thin wrapper for ipquality
 // IpQualityScoreClient wraps the ipqualityscore client and implements the IPQualityInterface for adding quality metrics.
 type IpQualityScoreClient struct {
 	client *ipqualityscore.IpQualityScore
@@ -77,4 +79,24 @@ func (l *IpQualityScoreClient) AddIPQuality(ip string) (*contracts.LocationScore
 	}
 
 	return EnrichLocationWithQualityScore(location, qualityScore)
+}
+
+// thin wrapper around ipprovider
+type IpProviderClient struct {
+	client *ipprovider.IPProvider
+}
+
+func NewIpProviderClient(cfg config.ProviderConfig) (*IpProviderClient, error) {
+	client, err := ipprovider.NewIPProvider(cfg.URL)
+	return &IpProviderClient{
+		client: client,
+	}, err
+}
+
+func (s *IpProviderClient) GetIP() (string, error) {
+	return s.client.GetIP()
+}
+
+func (s *IpProviderClient) ShowIpProvider() string {
+	return s.client.ShowIpProvider()
 }

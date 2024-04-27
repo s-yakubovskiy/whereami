@@ -5,36 +5,35 @@ import (
 	"log"
 
 	"github.com/s-yakubovskiy/whereami/internal/contracts"
-	"github.com/s-yakubovskiy/whereami/pkg/ipconfig"
 
 	"github.com/vishvananda/netlink"
 )
 
 // APIManager orchestrates operations related to IP configurations, IP location lookups, and IP quality assessments.
 type APIManager struct {
-	ipconfig  contracts.IPConfigInterface
-	primary   contracts.IPLocationInterface
-	secondary contracts.IPLocationInterface
-	ipquality contracts.IPQualityInterface
+	ipprovider contracts.IpProviderInterface
+	primary    contracts.IPLocationInterface
+	secondary  contracts.IPLocationInterface
+	ipquality  contracts.IPQualityInterface
 }
 
 // NewAPIManager creates a new APIManager with specified IP configuration, primary and secondary location services, and an IP quality service.
-func NewAPIManager(ip *ipconfig.IPConfig, primary, secondary contracts.IPLocationInterface, ipquality contracts.IPQualityInterface) *APIManager {
+func NewAPIManager(ip contracts.IpProviderInterface, primary, secondary contracts.IPLocationInterface, ipquality contracts.IPQualityInterface) *APIManager {
 	return &APIManager{
-		ipconfig:  ip,
-		primary:   primary,
-		secondary: secondary,
-		ipquality: ipquality,
+		ipprovider: ip,
+		primary:    primary,
+		secondary:  secondary,
+		ipquality:  ipquality,
 	}
 }
 
 // GetIP proxies the request to the underlying IP configuration service to retrieve the current IP address.
 func (l *APIManager) GetIP() (string, error) {
-	return l.ipconfig.GetIP()
+	return l.ipprovider.GetIP()
 }
 
 func (l *APIManager) ShowIpProvider() string {
-	return l.ipconfig.ShowIpProvider()
+	return l.ipprovider.ShowIpProvider()
 }
 
 // GetLocation attempts to find the geographical location of the given IP address, using the primary service and falling back to the secondary if necessary.

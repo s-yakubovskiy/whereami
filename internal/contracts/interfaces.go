@@ -1,7 +1,7 @@
 package contracts
 
-// IPConfigInterface defines the method for retrieving the current IP address.
-type IPConfigInterface interface {
+// IpProviderInterface defines the method for retrieving the current IP address.
+type IpProviderInterface interface {
 	GetIP() (string, error)
 	ShowIpProvider() string
 }

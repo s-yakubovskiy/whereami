@@ -27,6 +27,7 @@ type ProviderConfigs struct {
 	IpData           ProviderConfig `mapstructure:"ipdata"`
 	IpQualityScore   ProviderConfig `mapstructure:"ipqualityscore"`
 	OpenWeather      ProviderConfig `mapstructure:"openweather"`
+	Ifconfig         ProviderConfig `mapstructure:"ifconfig"`
 	PublicIpProvider string         `mapstructure:"public_ip_provider" yaml:"public_ip_provider"`
 }
 

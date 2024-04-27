@@ -12,6 +12,7 @@ import (
 type ServiceFactory interface {
 	CreateLocationService(cfg config.ProviderConfig) (contracts.IPLocationInterface, error)
 	CreateQualityService(cfg config.ProviderConfig) (contracts.IPQualityInterface, error)
+	CreateIpProviderService(cfg config.ProviderConfig) (contracts.IpProviderInterface, error)
 }
 
 // DefaultServiceFactory struct implements the ServiceFactory interface
@@ -35,4 +36,14 @@ func (f *DefaultServiceFactory) CreateQualityService(cfg config.ProviderConfig) 
 		return apimanager.NewIpQualityScoreClient(cfg)
 	}
 	return nil, fmt.Errorf("IP quality service not enabled")
+}
+
+// CreateIpProviderService creates an IP provider service client
+func (f *DefaultServiceFactory) CreateIpProviderService(cfg config.ProviderConfig) (contracts.IpProviderInterface, error) {
+	switch cfg.Name {
+	case "ifconfig":
+		return apimanager.NewIpProviderClient(cfg)
+	default:
+		return nil, fmt.Errorf("unknown ip provider service: %s", cfg.Name)
+	}
 }

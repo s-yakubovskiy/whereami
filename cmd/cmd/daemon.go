@@ -11,7 +11,6 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/servicefactory"
 	"github.com/s-yakubovskiy/whereami/internal/whereami"
 	"github.com/s-yakubovskiy/whereami/pkg/gpsdfetcher"
-	"github.com/s-yakubovskiy/whereami/pkg/ipconfig"
 	"github.com/spf13/cobra"
 )
 
@@ -36,12 +35,10 @@ func startDaemon() {
 	for _, task := range cfg.CrontabTasks {
 		taskCopy := task // Create a copy of the task for the current iteration
 		_, err := c.AddFunc(taskCopy.Schedule, func() {
-			ipconfig, err := ipconfig.NewIPConfig(cfg.ProviderConfigs.PublicIpProvider)
+			ifconfig, err := factory.CreateIpProviderService(cfg.ProviderConfigs.Ifconfig)
 			if err != nil {
-				log.Printf("Failed to create IP configuration: %v", err)
-				return
+				log.Fatalf("Failed to create IP configuration: %v", err)
 			}
-
 			ipapi, err := factory.CreateLocationService(cfg.ProviderConfigs.IpApi)
 			if err != nil {
 				log.Printf("Failed to create primary location service: %v", err)
@@ -58,7 +55,7 @@ func startDaemon() {
 				return
 			}
 
-			client := apimanager.NewAPIManager(ipconfig, ipapi, ipdata, ipquality)
+			client := apimanager.NewAPIManager(ifconfig, ipapi, ipdata, ipquality)
 			dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 			if err != nil {
 				log.Printf("Failed to open database: %v", err)
