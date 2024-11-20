@@ -2,16 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
-	"github.com/s-yakubovskiy/whereami/config"
-	"github.com/s-yakubovskiy/whereami/internal/apimanager"
-	"github.com/s-yakubovskiy/whereami/internal/dbclient"
-	"github.com/s-yakubovskiy/whereami/internal/dumper"
-	"github.com/s-yakubovskiy/whereami/internal/servicefactory"
-	"github.com/s-yakubovskiy/whereami/internal/whereami"
-	"github.com/s-yakubovskiy/whereami/pkg/gpsdfetcher"
+	// "github.com/s-yakubovskiy/whereami/config"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +13,7 @@ var rootCmd = &cobra.Command{
 	Short: "WhereAmI is an application to find your geolocation based on your IP",
 	Long:  `WhereAmI is a CLI application that allows users to find their geolocation based on their public IP address.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg := &config.Cfg
+		// cfg := &config.Cfg
 		introduce()
 		if showVersion {
 			fmt.Println("\nBuild Info:")
@@ -28,68 +21,68 @@ var rootCmd = &cobra.Command{
 			fmt.Println("  Commit:", Commit)
 			os.Exit(0)
 		}
-		if locationApi != "" {
-			cfg.MainProvider = locationApi
-		}
-		if publicIpApi != "" {
-			cfg.ProviderConfigs.PublicIpProvider = publicIpApi
-		}
-		if publicIP != "" {
-			cfg.PublicIP = publicIP
-		}
+		// 	if locationApi != "" {
+		// 		cfg.MainProvider = locationApi
+		// 	}
+		// 	if publicIpApi != "" {
+		// 		cfg.ProviderConfigs.PublicIpProvider = publicIpApi
+		// 	}
+		// 	if publicIP != "" {
+		// 		cfg.PublicIP = publicIP
+		// 	}
 
-		factory := &servicefactory.DefaultServiceFactory{}
+		// 	factory := &servicefactory.DefaultServiceFactory{}
 
-		ifconfig, err := factory.CreateIpProviderService(cfg.ProviderConfigs.Ifconfig)
-		if err != nil {
-			log.Fatalf("Failed to create IP configuration: %v", err)
-		}
+		// 	ifconfig, err := factory.CreateIpProviderService(cfg.ProviderConfigs.Ifconfig)
+		// 	if err != nil {
+		// 		log.Fatalf("Failed to create IP configuration: %v", err)
+		// 	}
 
-		ipapi, err := factory.CreateLocationService(cfg.ProviderConfigs.IpApi)
-		if err != nil {
-			log.Fatalf("Failed to create primary location service: %v", err)
-		}
-		ipdata, err := factory.CreateLocationService(cfg.ProviderConfigs.IpData)
-		if err != nil {
-			log.Fatalf("Failed to create secondary location service: %v", err)
-		}
-		ipquality, err := factory.CreateQualityService(cfg.ProviderConfigs.IpQualityScore)
-		if err != nil {
-			log.Fatalf("Failed to create IP quality service: %v", err)
-		}
+		// 	ipapi, err := factory.CreateLocationService(cfg.ProviderConfigs.IpApi)
+		// 	if err != nil {
+		// 		log.Fatalf("Failed to create primary location service: %v", err)
+		// 	}
+		// 	ipdata, err := factory.CreateLocationService(cfg.ProviderConfigs.IpData)
+		// 	if err != nil {
+		// 		log.Fatalf("Failed to create secondary location service: %v", err)
+		// 	}
+		// 	ipquality, err := factory.CreateQualityService(cfg.ProviderConfigs.IpQualityScore)
+		// 	if err != nil {
+		// 		log.Fatalf("Failed to create IP quality service: %v", err)
+		// 	}
 
-		// Use the FallbackLocationService to manage primary and secondary services
-		locationService := apimanager.NewFallbackLocationService(ipapi, ipdata)
-		client := apimanager.NewAPIManager(ifconfig, locationService, ipquality)
+		// 	// Use the FallbackLocationService to manage primary and secondary services
+		// 	locationService := apimanager.NewFallbackLocationService(ipapi, ipdata)
+		// 	client := apimanager.NewAPIManager(ifconfig, locationService, ipquality)
 
-		dbcli, err := dbclient.NewSQLiteDB(cfg.Database)
-		if err != nil {
-			log.Fatalf("Failed to open database: %v", err)
-		}
-		dumper, err := dumper.NewDumperJSON(dbcli)
-		if err != nil {
-			log.Fatalf("Failed to create dumper: %v", err)
-		}
+		// 	dbcli, err := dbclient.NewSQLiteDB(cfg.Database)
+		// 	if err != nil {
+		// 		log.Fatalf("Failed to open database: %v", err)
+		// 	}
+		// 	dumper, err := dumper.NewDumperJSON(dbcli)
+		// 	if err != nil {
+		// 		log.Fatalf("Failed to create dumper: %v", err)
+		// 	}
 
-		var gps gpsdfetcher.GPSInterface
-		if cfg.GPSConfig.Enabled || gpsEnabled {
-			cfg.GPSConfig.Enabled = true
-			if gpsProvider == "adb" {
-				gps = gpsdfetcher.NewGPSAdbFetcher()
-			} else if gpsProvider == "file" {
-				gps = gpsdfetcher.NewGPSDFileFetcher(cfg.GPSConfig.Timeout)
-			} else {
-				gps = gpsdfetcher.NewGPSDFetcher(cfg.GPSConfig.Timeout)
-			}
-		}
+		// 	var gps gpsdfetcher.GPSInterface
+		// 	if cfg.GPSConfig.Enabled || gpsEnabled {
+		// 		cfg.GPSConfig.Enabled = true
+		// 		if gpsProvider == "adb" {
+		// 			gps = gpsdfetcher.NewGPSAdbFetcher()
+		// 		} else if gpsProvider == "file" {
+		// 			gps = gpsdfetcher.NewGPSDFileFetcher(cfg.GPSConfig.Timeout)
+		// 		} else {
+		// 			gps = gpsdfetcher.NewGPSDFetcher(cfg.GPSConfig.Timeout)
+		// 		}
+		// 	}
 
-		// lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, cfg.GPSConfig.Enabled)
-		locator := whereami.NewLocator(client, dbcli, dumper, gps, cfg)
-		if fullShow {
-			locator.ShowFull()
-		} else {
-			locator.Show()
-		}
+		// 	// lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, cfg.GPSConfig.Enabled)
+		// 	locator := whereami.NewLocator(client, dbcli, dumper, gps, cfg)
+		// 	if fullShow {
+		// 		locator.ShowFull()
+		// 	} else {
+		// 		locator.Show()
+		// 	}
 	},
 }
 
