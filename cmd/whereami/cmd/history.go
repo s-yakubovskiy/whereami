@@ -1,3 +1,6 @@
+//go:build ignore
+// +build ignore
+
 package cmd
 
 import (
@@ -13,11 +16,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var storeCmd = &cobra.Command{
-	Use:   "store",
-	Short: "Store WhereAmI application",
-	Long:  `This command stores location information in the database (sqlite).`,
+var NumHistory int32
+
+var historyCmd = &cobra.Command{
+	Use:   "history",
+	Short: "History of WhereAmI locations",
+	Long:  `This command outputs the history of whereami locations. Print to stdout`,
 	Run: func(cmd *cobra.Command, args []string) {
+		introduce()
 		cfg := config.Cfg
 		if locationApi != "" {
 			cfg.MainProvider = locationApi
@@ -43,7 +49,8 @@ var storeCmd = &cobra.Command{
 			log.Fatalf("Failed to create IP quality service: %v", err)
 		}
 
-		client := apimanager.NewAPIManager(ifconfig, ipapi, ipdata, ipquality)
+		locationService := apimanager.NewFallbackLocationService(ipapi, ipdata)
+		client := apimanager.NewAPIManager(ifconfig, locationService, ipquality)
 		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
@@ -59,13 +66,13 @@ var storeCmd = &cobra.Command{
 			gps = gpsdfetcher.NewGPSDFetcher(cfg.GPSConfig.Timeout)
 		}
 
-		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, gpsEnabled)
+		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, publicIP, gpsEnabled)
 		locator := whereami.NewLocator(client, dbcli, dumper, gps, lCfg)
-		locator.Store()
+		locator.History(NumHistory)
 	},
 }
 
 func init() {
-	storeCmd.Flags().StringVarP(&locationApi, "provider", "p", "", "Select IP location provider: [ipapi, ipdata]")
-	rootCmd.AddCommand(storeCmd)
+	historyCmd.Flags().Int32VarP(&NumHistory, "number", "n", 10, "Specify number of last history locations to output")
+	rootCmd.AddCommand(historyCmd)
 }

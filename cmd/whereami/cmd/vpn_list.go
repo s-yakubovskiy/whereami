@@ -14,7 +14,7 @@ var listVPNCmd = &cobra.Command{
 	Short: "List all network interfaces marked as VPN",
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Cfg
-		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
+		dbcli, err := dbclient.NewSQLiteDB(cfg.Database)
 		introduce()
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)

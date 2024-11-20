@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package api.whrmi.v1;
+
+option go_package = "github.com/s-yakubovskiy/whereami/api/whrmi/v1;whrmi";
+option java_multiple_files = true;
+option java_package = "api.whrmi.v1";
+
+service LocationService {
+    rpc ShowLocation (ShowLocationRequest) returns (ShowLocationResponse);
+}
+
+message ShowLocationRequest {
+    string status = 1;
+}
+
+message ShowLocationResponse {
+    string status = 1;
+}
+

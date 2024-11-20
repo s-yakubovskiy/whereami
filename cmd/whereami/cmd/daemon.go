@@ -1,3 +1,6 @@
+//go:build ignore
+// +build ignore
+
 package cmd
 
 import (
@@ -55,7 +58,8 @@ func startDaemon() {
 				return
 			}
 
-			client := apimanager.NewAPIManager(ifconfig, ipapi, ipdata, ipquality)
+			locationService := apimanager.NewFallbackLocationService(ipapi, ipdata)
+			client := apimanager.NewAPIManager(ifconfig, locationService, ipquality)
 			dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
 			if err != nil {
 				log.Printf("Failed to open database: %v", err)
@@ -72,7 +76,7 @@ func startDaemon() {
 				gps = gpsdfetcher.NewGPSDFetcher(cfg.GPSConfig.Timeout)
 			}
 
-			lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, gpsEnabled)
+			lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, publicIP, gpsEnabled)
 			locator := whereami.NewLocator(client, dbcli, dumper, gps, lCfg)
 			locator.Store()
 		})

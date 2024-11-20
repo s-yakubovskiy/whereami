@@ -54,14 +54,14 @@ func (l *Locator) ShowFull() {
 	// }
 	// fmt.Printf("%+v\n", rep)
 	// os.Exit(8)
-	if l.cfg.IP == "" {
+	if l.cfg.PublicIP == "" {
 		ip, err = l.client.GetIP()
 		if err != nil {
 			common.Errorln(err.Error())
 			return
 		}
 	} else {
-		ip = l.cfg.IP
+		ip = l.cfg.PublicIP
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), ASYNC_TIMEOUT)
@@ -77,7 +77,7 @@ func (l *Locator) ShowFull() {
 	setupFetchRoutines(ctx, ip, locationChan, qualityChan, gpsReportChan, errorChan, l)
 
 	// Collect results and handle possible timeouts
-	location, quality, gpsReport := collectResults(ctx, locationChan, qualityChan, gpsReportChan, errorChan, l.cfg.GPS)
+	location, quality, gpsReport := collectResults(ctx, locationChan, qualityChan, gpsReportChan, errorChan, l.cfg.GPSConfig.Enabled)
 
 	// Combine all data into the final Location struct
 	if quality != nil {

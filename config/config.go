@@ -1,19 +1,41 @@
 package config
 
 import (
+	"fmt"
 	"strings"
 	"time"
 )
 
 var Cfg AppConfig
 
+// Option is a function that applies a configuration setting
+type Option func(*AppConfig)
+
+// AppConfig holds the configuration settings for the application.
+// It includes logging levels, database connections, scheduled tasks,
+// provider details, and GPS configurations.
 type AppConfig struct {
-	LogLevel        string          `mapstructure:"log_level" yaml:"log_level"`
-	Database        Database        `mapstructure:"database"`
-	CrontabTasks    []CrontabTask   `mapstructure:"crontab_tasks" yaml:"crontab_tasks"`
-	MainProvider    string          `mapstructure:"main_provider" yaml:"main_provider"`
-	ProviderConfigs ProviderConfigs `mapstructure:"provider_configs" yaml:"provider_configs"`
-	GPSConfig       GPSConfig       `mapstructure:"gps" yaml:"gps"`
+	LogLevel         string          `mapstructure:"log_level" yaml:"log_level"`
+	Logging          LoggingConfig   `mapstructure:"logging"`
+	Database         Database        `mapstructure:"database"`
+	CrontabTasks     []CrontabTask   `mapstructure:"crontab_tasks" yaml:"crontab_tasks"`
+	MainProvider     string          `mapstructure:"main_provider" yaml:"main_provider"`
+	PublicIpProvider string          `mapstructure:"public_ip_provider" yaml:"public_ip_provider"`
+	PublicIP         string          `mapstructure:"public_ip" yaml:"public_ip"`
+	ProviderConfigs  ProviderConfigs `mapstructure:"provider_configs" yaml:"provider_configs"`
+	GPSConfig        GPSConfig       `mapstructure:"gps" yaml:"gps"`
+}
+
+func WithPublicIP(ip string) Option {
+	return func(cfg *AppConfig) {
+		cfg.PublicIP = ip
+	}
+}
+
+type LoggingConfig struct {
+	Level  string `mapstructure:"level"`
+	Format string `mapstructure:"format"`
+	Output string `mapstructure:"output"`
 }
 
 type Database struct {
@@ -29,6 +51,21 @@ type ProviderConfigs struct {
 	OpenWeather      ProviderConfig `mapstructure:"openweather"`
 	Ifconfig         ProviderConfig `mapstructure:"ifconfig"`
 	PublicIpProvider string         `mapstructure:"public_ip_provider" yaml:"public_ip_provider"`
+}
+
+func (c *ProviderConfigs) GetConfig(name string) (ProviderConfig, error) {
+	switch name {
+	case "ipapi":
+		return c.IpApi, nil
+	case "ipdata":
+		return c.IpData, nil
+	case "ipqualityscore":
+		return c.IpQualityScore, nil
+	case "openweather":
+		return c.OpenWeather, nil
+	default:
+		return ProviderConfig{}, fmt.Errorf("unknown location service provider: %s", name)
+	}
 }
 
 type ProviderConfig struct {
@@ -57,4 +94,11 @@ func Init() {
 		WithAutomaticEnv(true).
 		WithEnvKeyReplacer(strings.NewReplacer(".", "_")).
 		Load(&AppConfig{})
+}
+
+// func ApplyOptions(opts ...Option) *AppConfig {
+func ApplyOptions(opts ...Option) {
+	for _, opt := range opts {
+		opt(&Cfg)
+	}
 }

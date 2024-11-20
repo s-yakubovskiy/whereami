@@ -1,6 +1,24 @@
-log_level: debug
+# Logging settings
+log_level: debug # NOTE: deprecated
+logging:
+  level: debug # Could be debug, info, warn, error
+  format: console # Could be json or console
+  output: stdout # Could be stdout, stderr, or a file path like /var/log/app.log
 
 main_provider: "ipdata"
+
+public_ip: ""
+
+# Public IP Provider
+public_ip_provider: "mock"
+
+# IP Enrichers
+enrichers:
+  ipapi:
+    name: ipapi
+    url: "http://ip-api.com/json/"
+    api_key: ""
+    enabled: true
 
 provider_configs:
   ipapi:
@@ -47,7 +65,6 @@ gps:
   timeout: 28s
   gpsd_socket: "/var/run/gpsd.sock"
   gpsd_dump_file: /opt/gps/data/gpsdata.json
-
 
 crontab_tasks:
   - schedule: "@every 3h"

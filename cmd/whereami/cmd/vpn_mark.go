@@ -19,7 +19,7 @@ var markVPNCmd = &cobra.Command{
 		interfaceName := args[0]
 		introduce()
 
-		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
+		dbcli, err := dbclient.NewSQLiteDB(cfg.Database)
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}

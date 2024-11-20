@@ -20,6 +20,11 @@ func NewGPSDFetcher(timeout time.Duration) *GPSDFetcher {
 	}
 }
 
+// New creates and returns a new GPSFetcher instance
+func NewWireGPSDFetcher() *GPSDFetcher {
+	return &GPSDFetcher{}
+}
+
 // Connect to the gpsd service
 func (g *GPSDFetcher) Connect() error {
 	session, err := gpsd.Dial(gpsd.DefaultAddress)

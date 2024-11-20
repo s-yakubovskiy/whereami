@@ -6,6 +6,16 @@ COMMIT=$(shell git rev-parse --short HEAD)
 SERVICE_NAME ?= $(shell basename $(CURDIR)) # this can be changed if service name doesn't match with current directory
 # SERVICE_NAME ?=whereami# this can be changed if service name doesn't match with current directory
 
+# gRPC Tools
+PROTOC := protoc
+PROTOC_GEN_GO := $(shell go env GOPATH)/bin/protoc-gen-go
+PROTOC_GEN_GO_GRPC := $(shell go env GOPATH)/bin/protoc-gen-go-grpc
+PROTO_DIR := ./api/whrmi/v1
+PROTO_FILE := $(PROTO_DIR)/*.proto
+PROTO_OUT := ./api/whrmi/v1
+
+.PHONY: init build lint install install-grpc generate-proto
+
 ifeq ($(GOHOSTOS), windows)
 	#the `find.exe` is different from `find` in bash/shell.
 	#to see https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/find.
@@ -18,22 +28,35 @@ else
 	API_PROTO_FILES=$(shell find api -name *.proto)
 endif
 
-.PHONY: init
-# init env
 
-.PHONY: build
+install-grpc:
+	@if [ ! -f "$(PROTOC_GEN_GO)" ]; then \
+		echo "Installing protoc-gen-go..."; \
+		$(GO) install google.golang.org/protobuf/cmd/protoc-gen-go@latest; \
+	fi
+	@if [ ! -f "$(PROTOC_GEN_GO_GRPC)" ]; then \
+		echo "Installing protoc-gen-go-grpc..."; \
+		$(GO) install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest; \
+	fi
+
+# Generate gRPC code from proto files
+generate-proto: install-grpc
+	$(PROTOC) --proto_path=$(PROTO_DIR) \
+		--go_out=$(PROTO_OUT) --go_opt=paths=source_relative \
+		--go-grpc_out=$(PROTO_OUT) --go-grpc_opt=paths=source_relative \
+		$(PROTO_FILE)
+
+
 # build
 build:
 # go build -ldflags  '-X github.com/s-yakubovskiy/whereami/cmd/cmd.Version=2.0.1 -X github.com/s-yakubovskiy/whereami/cmd/cmd.Commit=adndf32nd' -o ./bin/ ./... 
 	mkdir -p bin/ && go build -ldflags "-X github.com/s-yakubovskiy/whereami/cmd/cmd.Version=$(VERSION) -X github.com/s-yakubovskiy/whereami/cmd/cmd.Commit=$(COMMIT)" -o ./bin/ ./...
 
 
-.PHONY: lint
 # lint
 lint:
 	golangci-lint run --timeout 10m
 
-.PHONY: install
 # install
 install: build
 	@sudo systemctl stop whereami.service

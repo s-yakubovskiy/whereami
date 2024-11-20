@@ -8,22 +8,19 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/contracts"
 )
 
+// var _ contracts.DumperBasicInterface = &DumperJSON{}
+
 type LocationData struct {
 	Data []contracts.Location `json:"data"`
 }
 type DumperJSON struct {
-	db DumperInterface
+	db contracts.DumperInterface
 }
 
-func NewDumperJSON(d DumperInterface) (*DumperJSON, error) {
+func NewDumperJSON(d contracts.DumperInterface) (*DumperJSON, error) {
 	return &DumperJSON{
 		db: d,
 	}, nil
-}
-
-type DumperInterface interface {
-	GetAllLocations() ([]contracts.Location, error)
-	ImportLocations([]contracts.Location) error
 }
 
 func (d *DumperJSON) Export(exportPath string) {

@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
-	"os"
 
 	"github.com/s-yakubovskiy/whereami/config"
 	"github.com/s-yakubovskiy/whereami/internal/apimanager"
@@ -15,24 +13,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "whereami",
-	Short: "WhereAmI is an application to find your geolocation based on your IP",
-	Long:  `WhereAmI is a CLI application that allows users to find their geolocation based on their public IP address.`,
+var (
+	fullShow    bool
+	locationApi string
+	publicIpApi string
+	publicIP    string
+	gpsEnabled  bool
+	gpsProvider string
+)
+
+var showCmd = &cobra.Command{
+	Use:   "show",
+	Short: "Show WhereAmI application",
+	Long:  `This command Show current public ip address and fetching location information. Print to stdout`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg := config.Cfg
-		introduce()
-		if showVersion {
-			fmt.Println("\nBuild Info:")
-			fmt.Println("  Version:", Version)
-			fmt.Println("  Commit:", Commit)
-			os.Exit(0)
-		}
+		cfg := &config.Cfg
 		if locationApi != "" {
 			cfg.MainProvider = locationApi
 		}
 		if publicIpApi != "" {
 			cfg.ProviderConfigs.PublicIpProvider = publicIpApi
+		}
+		if publicIP != "" {
+			cfg.PublicIP = publicIP
 		}
 
 		factory := &servicefactory.DefaultServiceFactory{}
@@ -55,8 +58,9 @@ var rootCmd = &cobra.Command{
 			log.Fatalf("Failed to create IP quality service: %v", err)
 		}
 
-		client := apimanager.NewAPIManager(ifconfig, ipapi, ipdata, ipquality)
-		dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
+		locationService := apimanager.NewFallbackLocationService(ipapi, ipdata)
+		client := apimanager.NewAPIManager(ifconfig, locationService, ipquality)
+		dbcli, err := dbclient.NewSQLiteDB(cfg.Database)
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
@@ -77,8 +81,8 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, cfg.GPSConfig.Enabled)
-		locator := whereami.NewLocator(client, dbcli, dumper, gps, lCfg)
+		locator := whereami.NewLocator(client, dbcli, dumper, gps, cfg)
+		introduce()
 		if fullShow {
 			locator.ShowFull()
 		} else {
@@ -88,11 +92,10 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.Flags().BoolVarP(&fullShow, "full", "f", false, "Display full output")
-	rootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "Display application version")
-	rootCmd.Flags().BoolVarP(&gpsEnabled, "gps", "", false, "Add experimental GPS integration [gpsd service should be up & running]")
-	rootCmd.Flags().StringVarP(&locationApi, "location-api", "l", "", "Select IP location provider: [ipapi, ipdata]")
-	rootCmd.Flags().StringVarP(&publicIpApi, "public-ip-api", "p", "", "Select public IP API provider: [ifconfig.me, ipinfo.io, icanhazip.com]")
-	rootCmd.Flags().StringVarP(&gpsProvider, "gps-provider", "g", "", "Select GPS provider: [adb, file, gpsd (default)]")
-	rootCmd.Flags().StringVarP(&ipLookup, "ip", "", "", "Specify public IP to lookup info")
+	showCmd.Flags().BoolVarP(&fullShow, "full", "f", false, "Display full output")
+	showCmd.Flags().StringVarP(&locationApi, "location-api", "l", "", "Select ip location provider: [ipapi, ipdata]")
+	showCmd.Flags().StringVarP(&publicIpApi, "public-ip-api", "p", "", "Select public ip api provider: [ifconfig.me, ipinfo.io, icanhazip.com]")
+	showCmd.Flags().StringVarP(&publicIP, "ip", "i", "", "Specify public IP to lookup info")
+	showCmd.Flags().BoolVarP(&gpsEnabled, "gps", "", false, "Add experimental GPS integration [gpsd service should be up & running]")
+	rootCmd.AddCommand(showCmd)
 }
