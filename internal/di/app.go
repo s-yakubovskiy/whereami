@@ -1,7 +1,7 @@
 package di
 
 import (
-	"github.com/s-yakubovskiy/whereami/config"
+	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
 	"github.com/s-yakubovskiy/whereami/internal/service"
 )

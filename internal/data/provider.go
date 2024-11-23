@@ -2,7 +2,7 @@ package data
 
 import (
 	"github.com/google/wire"
-	"github.com/s-yakubovskiy/whereami/config"
+	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/data/ifconfig"
 	"github.com/s-yakubovskiy/whereami/internal/data/ipapi"
 	"github.com/s-yakubovskiy/whereami/internal/data/ipqualityscore"

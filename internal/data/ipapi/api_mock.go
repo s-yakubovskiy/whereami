@@ -1,5 +1,7 @@
 package ipapi
 
+import "github.com/s-yakubovskiy/whereami/internal/entity"
+
 var _ IpInfoRepo = &IpApi{}
 
 // type IpInfoRepo interface {
@@ -18,15 +20,12 @@ func NewIpApiMock(url, apikey string) (*IpApiMock, error) {
 	}, nil
 }
 
-func (l *IpApiMock) LookupIpInfo(ip string) (*IpInfo, error) {
-	return &IpInfo{
-		Org:         "mock",
-		AS:          "mock",
-		Status:      "mock",
+func (l *IpApiMock) LookupIpInfo(ip string) (*entity.Location, error) {
+	return &entity.Location{
 		Country:     "Russia",
+		Isp:         "mock",
 		CountryCode: "RU",
 		Region:      "Perm",
-		RegionName:  "Perm",
 		City:        "Perm",
 		Zip:         "000000",
 	}, nil

@@ -1,4 +1,4 @@
-package contracts
+package locator
 
 import (
 	"fmt"
@@ -6,6 +6,9 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/fatih/color"
+	"github.com/s-yakubovskiy/whereami/internal/entity"
 )
 
 func CreateMapLocation(lat, long float64) string {
@@ -105,4 +108,57 @@ func isEmpty(value interface{}) bool {
 		return v.Len() == 0
 	}
 	return false
+}
+
+// Output reworked to support ordered categories with conditional field output and correct struct handling
+func (uc *UseCase) Output(location *entity.Location, categories map[string][]string, orderedCategories []string) {
+	val := reflect.ValueOf(*location)
+
+	// Prepare color outputs
+	cyan := color.New(color.FgCyan).Add(color.Bold)
+	white := color.New(color.FgWhite)                     // For field values
+	magenta := color.New(color.FgMagenta).Add(color.Bold) // For categories
+	cyanP := cyan.PrintfFunc()
+	whiteP := white.PrintfFunc()
+	magentaP := magenta.PrintfFunc() // Print function for category names in magenta
+
+	// Iterate through each category in the ordered list
+	for _, category := range orderedCategories {
+		fields, exists := categories[category]
+		if !exists {
+			continue // Skip categories not defined in the map
+		}
+		magentaP("\n%s\n", capitalizeFirst(category)) // Print category name in magenta
+		for _, field := range fields {
+			fieldVal, found := findField(val, field)
+			if !found {
+				continue // Skip fields not found
+			}
+			if field == "date" {
+				handleDateField(fieldVal, cyanP, whiteP)
+				continue
+			}
+
+			if field == "map" {
+				handleMapField(fieldVal, cyanP, whiteP, location.Latitude, location.Longitude)
+			}
+			if field == "gps" {
+				printStructFields(fieldVal, cyanP, whiteP)
+				continue
+			}
+
+			fieldValue := fieldVal.Interface()
+			if reflect.TypeOf(fieldValue).Kind() == reflect.Struct && field == "scores" {
+				// Handle struct types specifically for 'scores'
+				if field != "scores" {
+					cyanP("  %s:\n", capitalizeFirst(field))
+				}
+				printStructFields(fieldVal, cyanP, whiteP)
+			} else if !isEmpty(fieldValue) {
+				// Skip empty fields except for 'date', which is handled separately
+				cyanP("  %s: ", capitalizeFirst(field))
+				whiteP("%v\n", fieldValue)
+			}
+		}
+	}
 }

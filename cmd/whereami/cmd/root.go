@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	// "github.com/s-yakubovskiy/whereami/config"
+	// "github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/spf13/cobra"
 )
 

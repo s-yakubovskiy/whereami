@@ -1,6 +1,8 @@
 package logging
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 
@@ -19,9 +21,11 @@ type Logger interface {
 	Infof(format string, v ...interface{})
 	Warnf(format string, v ...interface{})
 	Errorf(format string, v ...interface{})
+	ErrorfNew(format string, v ...interface{}) error
 	Fatalf(format string, v ...interface{})
 	Printf(format string, v ...interface{})
 	Sprintf(format string, v ...interface{}) string
+	PrettyPrint(v interface{})
 }
 
 // ZerologLogger implements the Logger interface using zerolog.
@@ -82,6 +86,11 @@ func (l *ZerologLogger) Errorf(format string, v ...interface{}) {
 	l.logger.Error().Msgf(format, v...)
 }
 
+// Errorf logs a formatted message at the error level.
+func (l *ZerologLogger) ErrorfNew(format string, v ...interface{}) error {
+	return errors.New(l.Sprintf(format, v...))
+}
+
 // Fatalf logs a formatted message at the fatal level and exits the application.
 func (l *ZerologLogger) Fatalf(format string, v ...interface{}) {
 	l.logger.Fatal().Msgf(format, v...)
@@ -95,4 +104,9 @@ func (l *ZerologLogger) Printf(format string, v ...interface{}) {
 // Sprintf returns a formatted string using fmt.Sprintf
 func (l *ZerologLogger) Sprintf(format string, v ...interface{}) string {
 	return fmt.Sprintf(format, v...)
+}
+
+func (l *ZerologLogger) PrettyPrint(v interface{}) {
+	prettyData, _ := json.MarshalIndent(v, "", "  ")
+	l.Debug(string(prettyData))
 }

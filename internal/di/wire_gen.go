@@ -7,7 +7,7 @@
 package di
 
 import (
-	"github.com/s-yakubovskiy/whereami/config"
+	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/data"
 	"github.com/s-yakubovskiy/whereami/internal/data/ifconfig"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
@@ -33,11 +33,11 @@ func initializeRealShowApp() (*App, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	ipQualityScoreMock, err := data.ProvideIpQualityScoreMock(providerConfigs)
+	ipQualityScore, err := data.ProvideIpQualityScore(providerConfigs)
 	if err != nil {
 		return nil, nil, err
 	}
-	useCase := locator.NewLocatorUserCase(logger, appConfig, ifconfigMe, ipApi, ipQualityScoreMock)
+	useCase := locator.NewLocatorUserCase(logger, appConfig, ifconfigMe, ipApi, ipQualityScore)
 	locationShowService := service.NewLocationShowService(useCase)
 	app := NewShowApp(logger, appConfig, locationShowService)
 	return app, func() {

@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+
+	"github.com/s-yakubovskiy/whereami/internal/common"
+	"github.com/s-yakubovskiy/whereami/internal/entity"
 )
 
 var _ IpInfoRepo = &IpApi{}
 
 type IpInfoRepo interface {
-	LookupIpInfo(string) (*IpInfo, error)
+	LookupIpInfo(string) (*entity.Location, error)
 }
 
 type IpApi struct {
@@ -41,7 +44,7 @@ func NewIpApi(url, apikey string) (*IpApi, error) {
 	}, nil
 }
 
-func (l *IpApi) LookupIpInfo(ip string) (*IpInfo, error) {
+func (l *IpApi) LookupIpInfo(ip string) (*entity.Location, error) {
 	resp, err := http.Get(l.url + string(ip))
 	if err != nil {
 		return nil, err
@@ -52,7 +55,27 @@ func (l *IpApi) LookupIpInfo(ip string) (*IpInfo, error) {
 		return nil, err
 	}
 
-	var result *IpInfo
-	json.Unmarshal([]byte(jsonData), &result)
-	return result, err
+	var ipInfo *IpInfo
+	json.Unmarshal([]byte(jsonData), &ipInfo)
+	return ConvertIpApiToLocation(ipInfo)
+}
+
+func ConvertIpApiToLocation(ip *IpInfo) (*entity.Location, error) {
+	return &entity.Location{
+		IP:          ip.Query,
+		Country:     ip.Country,
+		CountryCode: ip.CountryCode,
+		Region:      ip.RegionName,
+		RegionCode:  ip.Region,
+		City:        ip.City,
+		Timezone:    ip.Timezone,
+		Zip:         ip.Zip,
+		Flag:        common.CountryCodeToEmoji(ip.CountryCode),
+		Isp:         ip.ISP, // Assuming ASN Name represents the ISP
+		Latitude:    ip.Lat,
+		Longitude:   ip.Lon,
+		Date:        "", // Set this to current date or as required
+		Vpn:         false,
+		Comment:     "Fetched with ipapi provider",
+	}, nil
 }

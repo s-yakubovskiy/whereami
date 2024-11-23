@@ -5,7 +5,7 @@ package di
 
 import (
 	"github.com/google/wire"
-	"github.com/s-yakubovskiy/whereami/config"
+	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/data"
 	"github.com/s-yakubovskiy/whereami/internal/data/ifconfig"
 	"github.com/s-yakubovskiy/whereami/internal/data/ipapi"
@@ -35,7 +35,7 @@ func initializeRealShowApp() (*App, func(), error) {
 
 		wire.Bind(new(locator.PublicIpRepo), new(*ifconfig.IfconfigMe)),
 		wire.Bind(new(locator.IpInfoRepo), new(*ipapi.IpApi)),
-		wire.Bind(new(locator.IpQualityScoreRepo), new(*ipqualityscore.IpQualityScoreMock)),
+		wire.Bind(new(locator.IpQualityScoreRepo), new(*ipqualityscore.IpQualityScore)),
 		NewShowApp,
 	)
 	return &App{}, nil, nil

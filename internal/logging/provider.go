@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog"
-	"github.com/s-yakubovskiy/whereami/config"
+	"github.com/s-yakubovskiy/whereami/internal/config"
 )
 
 // ProvideLogger configures and returns a zerolog logger based on the application's configuration.

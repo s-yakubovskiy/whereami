@@ -4,14 +4,43 @@ import (
 	"context"
 	"time"
 
-	"github.com/s-yakubovskiy/whereami/config"
+	"github.com/s-yakubovskiy/whereami/internal/config"
 	// "github.com/s-yakubovskiy/whereami/internal/contracts"
-	"github.com/s-yakubovskiy/whereami/internal/data/ipapi"
+
 	"github.com/s-yakubovskiy/whereami/internal/entity"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
 )
 
 var ASYNC_TIMEOUT = 35 * time.Second
+
+var (
+	categories = map[string][]string{
+		"Geographical Information": {
+			"country", "countryCode", "region", "regionCode",
+			"city", "timezone", "zip", "latitude", "longitude",
+		},
+		"Network Information": {
+			"ip", "isp", "asn", "flag",
+		},
+		"Security Assessments": {
+			"vpnInterface", "scores",
+		},
+		// "GPS": {
+		// 	"gps",
+		// },
+		"Miscellaneous": {
+			"map", "date", "comment",
+		},
+	}
+
+	orderedCategories = []string{
+		"Network Information",
+		"Geographical Information",
+		"Security Assessments",
+		"GPS",
+		"Miscellaneous",
+	}
+)
 
 type UseCase struct {
 	cfg                *config.AppConfig
@@ -22,11 +51,11 @@ type UseCase struct {
 }
 
 type IpInfoRepo interface {
-	LookupIpInfo(string) (*ipapi.IpInfo, error)
+	LookupIpInfo(string) (*entity.Location, error)
 }
 
 type IpQualityScoreRepo interface {
-	LookupIpQualityScore(string) (*entity.IpQualityScoreInfo, error)
+	LookupIpQualityScore(string) (*entity.LocationScores, error)
 }
 
 type PublicIpRepo interface {
@@ -93,9 +122,21 @@ func (uc *UseCase) ShowLocation(ctx context.Context) error {
 	// uc.temp(ip)
 
 	// Create channels for concurrent fetching
-	// locationChan := make(chan *contracts.Location, 1)
-	// qualityChan := make(chan *contracts.LocationScores, 1)
-	// errorChan := make(chan error, 3) // to handle errors from goroutines
+	locationChan := make(chan *entity.Location, 1)
+	qualityChan := make(chan *entity.LocationScores, 1)
+	errorChan := make(chan error, 3) // to handle errors from goroutines
+	uc.setupFetchRoutines(
+		ctx, ip, locationChan, qualityChan, errorChan,
+	)
+
+	location, quality := uc.collectResults(ctx, locationChan, qualityChan, errorChan)
+
+	// Combine all data into the final Location struct
+	if quality != nil {
+		location.Scores = *quality
+	}
+	location.Comment += ". Using public ip provider: <tbd>"
+	uc.Output(location, categories, orderedCategories)
 
 	uc.log.Info(ip)
 

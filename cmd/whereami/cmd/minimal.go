@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/s-yakubovskiy/whereami/config"
+	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/di"
 	"github.com/spf13/cobra"
 )
@@ -28,6 +28,8 @@ var minimalCmd = &cobra.Command{
 		config.ApplyOptions(
 			config.WithPublicIP(publicIP),
 		)
+		// app.Logger.Fatalf("%+v\n", app.Config)
+		app.Logger.PrettyPrint(app.Config)
 		RunMinimal(app)
 		defer cleanup()
 	},

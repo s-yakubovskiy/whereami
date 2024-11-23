@@ -23,11 +23,12 @@ func NewIpQualityScoreMock(url, apikey string) (*IpQualityScoreMock, error) {
 	}, nil
 }
 
-func (api *IpQualityScoreMock) LookupIpQualityScore(ip string) (*entity.IpQualityScoreInfo, error) {
-	return &entity.IpQualityScoreInfo{
-		Success:     true,
-		Message:     "hello mock",
-		FraudScore:  88,
-		CountryCode: "RU",
+func (api *IpQualityScoreMock) LookupIpQualityScore(ip string) (*entity.LocationScores, error) {
+	return &entity.LocationScores{
+		FraudScore: 88,
+		IsCrawler:  true,
+		VPN:        true,
+		BotStatus:  false,
+		Host:       "mock",
 	}, nil
 }

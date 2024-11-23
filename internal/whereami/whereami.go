@@ -1,7 +1,7 @@
 package whereami
 
 import (
-	"github.com/s-yakubovskiy/whereami/config"
+	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/apimanager"
 	"github.com/s-yakubovskiy/whereami/internal/contracts"
 	"github.com/s-yakubovskiy/whereami/internal/dbclient"
