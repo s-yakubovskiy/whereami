@@ -1,19 +1,16 @@
-//go:build ignore
-// +build ignore
-
 package cmd
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"github.com/robfig/cron/v3"
+	"github.com/s-yakubovskiy/whereami/api/whrmi/v1"
 	"github.com/s-yakubovskiy/whereami/internal/config"
-	"github.com/s-yakubovskiy/whereami/internal/apimanager"
-	"github.com/s-yakubovskiy/whereami/internal/dbclient"
-	"github.com/s-yakubovskiy/whereami/internal/dumper"
-	"github.com/s-yakubovskiy/whereami/internal/servicefactory"
-	"github.com/s-yakubovskiy/whereami/internal/whereami"
-	"github.com/s-yakubovskiy/whereami/pkg/gpsdfetcher"
+	"github.com/s-yakubovskiy/whereami/internal/di"
 	"github.com/spf13/cobra"
 )
 
@@ -21,72 +18,77 @@ var daemonCmd = &cobra.Command{
 	Use:   "daemon",
 	Short: "Run WhereAmI as a background service",
 	Long:  `This command starts the WhereAmI service as a daemon that performs tasks based on the crontab configuration.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		startDaemon()
-	},
+	Run:   daemonRun,
 }
 
+var (
+	cronScheduler *cron.Cron
+	initOnce      sync.Once
+	app           *di.App
+)
+
 func init() {
+	showIntro = false
 	rootCmd.AddCommand(daemonCmd)
 }
 
-func startDaemon() {
+func initializeAppOnce(cmd *cobra.Command) error {
+	var err error
+	initOnce.Do(func() {
+		app, _, _, err = initializeApp(cmd)
+	})
+	return err
+}
+
+// Main function to run daemon
+func daemonRun(cmd *cobra.Command, args []string) {
 	cfg := config.Cfg
-	factory := &servicefactory.DefaultServiceFactory{}
 
-	c := cron.New()
+	err := initializeAppOnce(cmd)
+	if err != nil {
+		log.Fatalf("Failed to initialize application: %v", err)
+	}
+
+	cronScheduler = cron.New()
 	for _, task := range cfg.CrontabTasks {
-		taskCopy := task // Create a copy of the task for the current iteration
-		_, err := c.AddFunc(taskCopy.Schedule, func() {
-			ifconfig, err := factory.CreateIpProviderService(cfg.ProviderConfigs.Ifconfig)
-			if err != nil {
-				log.Fatalf("Failed to create IP configuration: %v", err)
-			}
-			ipapi, err := factory.CreateLocationService(cfg.ProviderConfigs.IpApi)
-			if err != nil {
-				log.Printf("Failed to create primary location service: %v", err)
-				return
-			}
-			ipdata, err := factory.CreateLocationService(cfg.ProviderConfigs.IpData)
-			if err != nil {
-				log.Printf("Failed to create secondary location service: %v", err)
-				return
-			}
-			ipquality, err := factory.CreateQualityService(cfg.ProviderConfigs.IpQualityScore)
-			if err != nil {
-				log.Printf("Failed to create IP quality service: %v", err)
-				return
-			}
+		taskCopy := task // Copy the task for the current iteration
 
-			locationService := apimanager.NewFallbackLocationService(ipapi, ipdata)
-			client := apimanager.NewAPIManager(ifconfig, locationService, ipquality)
-			dbcli, err := dbclient.NewSQLiteDB(cfg.Database.Path)
-			if err != nil {
-				log.Printf("Failed to open database: %v", err)
-				return
-			}
-			dumper, err := dumper.NewDumperJSON(dbcli)
-			if err != nil {
-				log.Printf("Failed to create dumper: %v", err)
-				return
-			}
-			var gps gpsdfetcher.GPSInterface
-			if cfg.GPSConfig.Enabled || gpsEnabled {
-				cfg.GPSConfig.Enabled = true
-				gps = gpsdfetcher.NewGPSDFetcher(cfg.GPSConfig.Timeout)
-			}
-
-			lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, publicIP, gpsEnabled)
-			locator := whereami.NewLocator(client, dbcli, dumper, gps, lCfg)
-			locator.Store()
+		_, err := cronScheduler.AddFunc(taskCopy.Schedule, func() {
+			performTask(taskCopy)
 		})
 		if err != nil {
 			log.Printf("Error scheduling task: %v", err)
 		}
 	}
 
-	c.Start()
+	cronScheduler.Start()
+	signalHandler()
+}
 
-	// Block this goroutine, as c.Start() runs in its own goroutine.
-	select {}
+// Function to fetch location and store
+func performTask(task config.CrontabTask) { // assuming task is of some TaskType
+	ctx := app.NewContext() // Hypothetical context getter
+	data, err := app.LocatorService.GetLocation(ctx, nil)
+	if err != nil {
+		app.Log.Printf("Failed to retrieve location: %v", err)
+		return
+	}
+
+	_, err = app.Keeper.StoreLocation(ctx, &whrmi.StoreLocationRequest{Location: data.Location})
+	if err != nil {
+		app.Log.Printf("Failed to save location: %v", err)
+	}
+}
+
+// Handle system signals for graceful shutdown
+func signalHandler() {
+	signalChannel := make(chan os.Signal, 1)
+	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
+
+	<-signalChannel
+	log.Println("Received shutdown signal")
+	cronScheduler.Stop() // Stop cron scheduler
+
+	// Additional cleanup if necessary
+	os.Exit(0)
 }

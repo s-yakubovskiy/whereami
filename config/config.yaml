@@ -67,4 +67,4 @@ gps:
   gpsd_dump_file: /opt/gps/data/gpsdata.json
 
 crontab_tasks:
-  - schedule: "@every 3h"
+  - schedule: "@every 1h"

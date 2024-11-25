@@ -16,6 +16,7 @@ require (
 	github.com/electricbubble/gadb v0.1.0
 	github.com/google/wire v0.6.0
 	github.com/pressly/goose/v3 v3.19.2
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/stratoberry/go-gpsd v1.3.0
 	github.com/vishvananda/netlink v1.3.0
 	google.golang.org/grpc v1.65.0

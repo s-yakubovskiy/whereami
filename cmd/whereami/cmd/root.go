@@ -29,6 +29,7 @@ var (
 	publicIP    string
 	gpsEnabled  bool
 	gpsProvider string
+	showIntro   = true
 )
 
 var rootCmd = &cobra.Command{
@@ -48,18 +49,20 @@ var rootCmd = &cobra.Command{
 }
 
 func introduce() {
-	ascii := figlet4go.NewAsciiRender()
+	if showIntro {
+		ascii := figlet4go.NewAsciiRender()
 
-	// Adding the colors to RenderOptions
-	options := figlet4go.NewRenderOptions()
-	options.FontColor = []figlet4go.Color{
-		figlet4go.ColorMagenta,
-		figlet4go.ColorCyan,
+		// Adding the colors to RenderOptions
+		options := figlet4go.NewRenderOptions()
+		options.FontColor = []figlet4go.Color{
+			figlet4go.ColorMagenta,
+			figlet4go.ColorCyan,
+		}
+
+		renderStr, _ := ascii.RenderOpts(appName, options)
+		fmt.Print(renderStr)
+		fmt.Println("    ... getting your location data ...")
 	}
-
-	renderStr, _ := ascii.RenderOpts(appName, options)
-	fmt.Print(renderStr)
-	fmt.Println("    ... getting your location data ...")
 }
 
 func initializeApp(cmd *cobra.Command) (*di.App, context.Context, context.CancelFunc, error) {
