@@ -124,6 +124,8 @@ const (
 	LocationKeeperService_Init_FullMethodName              = "/api.whrmi.v1.LocationKeeperService/Init"
 	LocationKeeperService_AddVpnInterface_FullMethodName   = "/api.whrmi.v1.LocationKeeperService/AddVpnInterface"
 	LocationKeeperService_ListVpnInterfaces_FullMethodName = "/api.whrmi.v1.LocationKeeperService/ListVpnInterfaces"
+	LocationKeeperService_ExportLocations_FullMethodName   = "/api.whrmi.v1.LocationKeeperService/ExportLocations"
+	LocationKeeperService_ImportLocations_FullMethodName   = "/api.whrmi.v1.LocationKeeperService/ImportLocations"
 )
 
 // LocationKeeperServiceClient is the client API for LocationKeeperService service.
@@ -133,6 +135,8 @@ type LocationKeeperServiceClient interface {
 	Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*InitResponse, error)
 	AddVpnInterface(ctx context.Context, in *AddVpnInterfaceRequest, opts ...grpc.CallOption) (*AddVpnInterfaceResponse, error)
 	ListVpnInterfaces(ctx context.Context, in *ListVpnInterfacesRequest, opts ...grpc.CallOption) (*ListVpnInterfacesResponse, error)
+	ExportLocations(ctx context.Context, in *ExportLocationsRequest, opts ...grpc.CallOption) (*ExportLocationsResponse, error)
+	ImportLocations(ctx context.Context, in *ImportLocationsRequest, opts ...grpc.CallOption) (*ImportLocationsResponse, error)
 }
 
 type locationKeeperServiceClient struct {
@@ -173,6 +177,26 @@ func (c *locationKeeperServiceClient) ListVpnInterfaces(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *locationKeeperServiceClient) ExportLocations(ctx context.Context, in *ExportLocationsRequest, opts ...grpc.CallOption) (*ExportLocationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExportLocationsResponse)
+	err := c.cc.Invoke(ctx, LocationKeeperService_ExportLocations_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *locationKeeperServiceClient) ImportLocations(ctx context.Context, in *ImportLocationsRequest, opts ...grpc.CallOption) (*ImportLocationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ImportLocationsResponse)
+	err := c.cc.Invoke(ctx, LocationKeeperService_ImportLocations_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LocationKeeperServiceServer is the server API for LocationKeeperService service.
 // All implementations must embed UnimplementedLocationKeeperServiceServer
 // for forward compatibility.
@@ -180,6 +204,8 @@ type LocationKeeperServiceServer interface {
 	Init(context.Context, *InitRequest) (*InitResponse, error)
 	AddVpnInterface(context.Context, *AddVpnInterfaceRequest) (*AddVpnInterfaceResponse, error)
 	ListVpnInterfaces(context.Context, *ListVpnInterfacesRequest) (*ListVpnInterfacesResponse, error)
+	ExportLocations(context.Context, *ExportLocationsRequest) (*ExportLocationsResponse, error)
+	ImportLocations(context.Context, *ImportLocationsRequest) (*ImportLocationsResponse, error)
 	mustEmbedUnimplementedLocationKeeperServiceServer()
 }
 
@@ -198,6 +224,12 @@ func (UnimplementedLocationKeeperServiceServer) AddVpnInterface(context.Context,
 }
 func (UnimplementedLocationKeeperServiceServer) ListVpnInterfaces(context.Context, *ListVpnInterfacesRequest) (*ListVpnInterfacesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListVpnInterfaces not implemented")
+}
+func (UnimplementedLocationKeeperServiceServer) ExportLocations(context.Context, *ExportLocationsRequest) (*ExportLocationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExportLocations not implemented")
+}
+func (UnimplementedLocationKeeperServiceServer) ImportLocations(context.Context, *ImportLocationsRequest) (*ImportLocationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ImportLocations not implemented")
 }
 func (UnimplementedLocationKeeperServiceServer) mustEmbedUnimplementedLocationKeeperServiceServer() {}
 func (UnimplementedLocationKeeperServiceServer) testEmbeddedByValue()                               {}
@@ -274,6 +306,42 @@ func _LocationKeeperService_ListVpnInterfaces_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LocationKeeperService_ExportLocations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExportLocationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LocationKeeperServiceServer).ExportLocations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LocationKeeperService_ExportLocations_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LocationKeeperServiceServer).ExportLocations(ctx, req.(*ExportLocationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LocationKeeperService_ImportLocations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ImportLocationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LocationKeeperServiceServer).ImportLocations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LocationKeeperService_ImportLocations_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LocationKeeperServiceServer).ImportLocations(ctx, req.(*ImportLocationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LocationKeeperService_ServiceDesc is the grpc.ServiceDesc for LocationKeeperService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -292,6 +360,14 @@ var LocationKeeperService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListVpnInterfaces",
 			Handler:    _LocationKeeperService_ListVpnInterfaces_Handler,
+		},
+		{
+			MethodName: "ExportLocations",
+			Handler:    _LocationKeeperService_ExportLocations_Handler,
+		},
+		{
+			MethodName: "ImportLocations",
+			Handler:    _LocationKeeperService_ImportLocations_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -4,6 +4,7 @@ package cmd
 import (
 	"fmt"
 
+	pb "github.com/s-yakubovskiy/whereami/api/whrmi/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +34,7 @@ func vpnMarkRun(cmd *cobra.Command, args []string) {
 	}
 	defer cleanup()
 
-	_, err = app.Keeper.AddVpnInterface(ctx, nil)
+	_, err = app.Keeper.AddVpnInterface(ctx, &pb.AddVpnInterfaceRequest{Vpninterface: args[0]})
 	if err != nil {
 		app.Log.Fatalf("Failed to retrieve VPN interfaces: %v", err)
 	}

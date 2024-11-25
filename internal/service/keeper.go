@@ -39,3 +39,11 @@ func convertToListVpnInterfacesResponse(p []string) *pb.ListVpnInterfacesRespons
 		Vpninterfaces: p,
 	}
 }
+
+func (s *LocationKeeperService) ImportLocations(ctx context.Context, req *pb.ImportLocationsRequest) (*pb.ImportLocationsResponse, error) {
+	return nil, s.uc.ImportLocations(ctx, req.Importpath)
+}
+
+func (s *LocationKeeperService) ExportLocations(ctx context.Context, req *pb.ExportLocationsRequest) (*pb.ExportLocationsResponse, error) {
+	return nil, s.uc.ExportLocations(ctx, req.Exportpath)
+}

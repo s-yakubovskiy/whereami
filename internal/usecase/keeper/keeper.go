@@ -2,12 +2,13 @@ package keeper
 
 import (
 	"context"
+	"encoding/json"
+	"log"
+	"os"
 
 	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/data/db"
-
-	// "github.com/s-yakubovskiy/whereami/internal/contracts"
-
+	"github.com/s-yakubovskiy/whereami/internal/entity"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
 )
 
@@ -19,10 +20,24 @@ type UseCase struct {
 	lk  LocationKeeperRepo
 }
 
-type LocationKeeperRepo interface {
-	InitDb(ctx context.Context) error
+type LocationData struct {
+	Data []entity.Location `json:"data"`
+}
+
+type LocationKeeperDumperRepo interface {
+	GetAllLocations() ([]entity.Location, error)
+	ImportLocations([]entity.Location) error
+}
+
+type LocationKeeperVpnRepo interface {
 	AddVPNInterface(string) error
 	ListVPNInterfaces() ([]string, error)
+}
+
+type LocationKeeperRepo interface {
+	LocationKeeperVpnRepo
+	LocationKeeperDumperRepo
+	InitDb(ctx context.Context) error
 }
 
 func NewLocationKeeperUseCase(log logging.Logger, cfg *config.AppConfig, lk LocationKeeperRepo) *UseCase {
@@ -59,4 +74,44 @@ func (uc *UseCase) ListVPNInterfaces() ([]string, error) {
 		return nil, err
 	}
 	return interfaces, nil
+}
+
+func (uc *UseCase) ExportLocations(ctx context.Context, exportPath string) error {
+	uc.log.Debug("UseCase ExportLocations")
+	data, err := uc.lk.GetAllLocations()
+	if err != nil {
+		return err
+	}
+
+	// Convert to JSON
+	jsonData, err := json.Marshal(LocationData{Data: data})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Write JSON data to file
+	err = os.WriteFile(exportPath, jsonData, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return nil
+}
+
+func (uc *UseCase) ImportLocations(ctx context.Context, importPath string) error {
+	uc.log.Debug("UseCase ImportLocations")
+
+	file, err := os.ReadFile(importPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var data LocationData
+	err = json.Unmarshal(file, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := uc.lk.ImportLocations(data.Data); err != nil {
+		log.Fatal(err)
+	}
+	return nil
 }

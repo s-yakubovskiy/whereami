@@ -14,6 +14,8 @@ service LocationKeeperService {
     rpc Init (InitRequest) returns (InitResponse);
     rpc AddVpnInterface (AddVpnInterfaceRequest) returns (AddVpnInterfaceResponse);
     rpc ListVpnInterfaces (ListVpnInterfacesRequest) returns (ListVpnInterfacesResponse);
+    rpc ExportLocations (ExportLocationsRequest) returns (ExportLocationsResponse);
+    rpc ImportLocations (ImportLocationsRequest) returns (ImportLocationsResponse);
 }
 
 message ShowLocationRequest {
@@ -38,3 +40,12 @@ message ListVpnInterfacesResponse {
   repeated string vpninterfaces = 1;
 }
 
+message ExportLocationsRequest {
+ string exportpath = 1;
+}
+message ExportLocationsResponse {}
+
+message ImportLocationsRequest {
+   string importpath = 1;
+}
+message ImportLocationsResponse {}

@@ -11,6 +11,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// version overrides
+var (
+	Version     string
+	Commit      string
+	showVersion bool
+)
+
+// public flags for whrmi
 var (
 	fullShow    bool
 	locationApi string
