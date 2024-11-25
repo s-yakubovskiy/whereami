@@ -73,43 +73,11 @@ func NewLocatorUserCase(log logging.Logger, cfg *config.AppConfig, locationRepo 
 	}
 }
 
-func (uc *UseCase) temp(publicIp string) {
-	//
-	resp, err := uc.ipInfoRepo.LookupIpInfo(publicIp)
-	if err != nil {
-		uc.log.Error(err.Error())
-	}
-	uc.log.Infof("%+v\n", resp)
-	iqs, _ := uc.ipQualityScoreRepo.LookupIpQualityScore(publicIp)
-	uc.log.Infof("%+v\n", iqs)
-}
-
-func (uc *UseCase) debug(ctx context.Context) error {
-	var ip string
-	var err error
-
-	ctx.Value("hi")
-	uc.log.Infof("UseCase ShowLocation, public ip %s\n", uc.cfg.PublicIP)
-
-	if uc.cfg.PublicIP == "" {
-		ip, err = uc.publicIpRepo.GetIP()
-		if err != nil {
-			uc.log.Errorf("Error fetching IP: %v", err.Error())
-		}
-	} else {
-		ip = uc.cfg.PublicIP
-	}
-
-	uc.log.Info(ip)
-	uc.temp(ip)
-	return nil
-}
-
 func (uc *UseCase) ShowLocation(ctx context.Context) error {
 	var ip string
 	var err error
 
-	uc.log.Infof("UseCase ShowLocation, public ip %s", uc.cfg.PublicIP)
+	uc.log.Debugf("UseCase ShowLocation, public ip %s", uc.cfg.PublicIP)
 
 	if uc.cfg.PublicIP == "" {
 		ip, err = uc.publicIpRepo.GetIP()
@@ -119,7 +87,6 @@ func (uc *UseCase) ShowLocation(ctx context.Context) error {
 	} else {
 		ip = uc.cfg.PublicIP
 	}
-	// uc.temp(ip)
 
 	// Create channels for concurrent fetching
 	locationChan := make(chan *entity.Location, 1)
@@ -137,8 +104,5 @@ func (uc *UseCase) ShowLocation(ctx context.Context) error {
 	}
 	location.Comment += ". Using public ip provider: <tbd>"
 	uc.Output(location, categories, orderedCategories)
-
-	uc.log.Info(ip)
-
 	return nil
 }

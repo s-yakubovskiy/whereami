@@ -2,33 +2,27 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
-	migrations "github.com/s-yakubovskiy/whereami"
-	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/spf13/cobra"
 )
+
+func initRun(cmd *cobra.Command, args []string) {
+	app, ctx, cleanup, err := initializeApp(cmd)
+	if err != nil {
+		return
+	}
+	defer cleanup()
+
+	app.Keeper.Init(ctx, nil)
+	app.Log.Info("Initialization complete")
+}
 
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize the WhereAmI application",
 	Long:  `This command initializes the WhereAmI application, setting up the SQLite database and applying necessary migrations.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		cfg := config.Cfg
-
-		// Initialize the database
-		gw, err := migrations.NewGooseWorker(cfg.Database.Path)
-		if err != nil {
-			log.Fatalf("Failed to create database: %v\n", err)
-		}
-		if err := gw.InitDB(); err != nil {
-			log.Fatalf("Failed to initialize database: %v", err)
-		}
-
-		introduce()
-		fmt.Println("Initialization complete.")
-	},
+	Run:   initRun,
 }
 
 func init() {

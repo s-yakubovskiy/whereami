@@ -10,11 +10,31 @@ service LocationService {
     rpc ShowLocation (ShowLocationRequest) returns (ShowLocationResponse);
 }
 
+service LocationKeeperService {
+    rpc Init (InitRequest) returns (InitResponse);
+    rpc AddVpnInterface (AddVpnInterfaceRequest) returns (AddVpnInterfaceResponse);
+    rpc ListVpnInterfaces (ListVpnInterfacesRequest) returns (ListVpnInterfacesResponse);
+}
+
 message ShowLocationRequest {
     string status = 1;
 }
 
 message ShowLocationResponse {
     string status = 1;
+}
+
+
+message InitRequest {}
+message InitResponse {}
+
+message AddVpnInterfaceRequest {
+  string vpninterface = 1;
+}
+message AddVpnInterfaceResponse {}
+
+message ListVpnInterfacesRequest {}
+message ListVpnInterfacesResponse {
+  repeated string vpninterfaces = 1;
 }
 

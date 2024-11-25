@@ -10,9 +10,10 @@ import (
 type AppOption func(*App) error
 
 type App struct {
-	Logger         logging.Logger
+	Log            logging.Logger
 	Config         *config.AppConfig
 	LocatorService *service.LocationShowService
+	Keeper         *service.LocationKeeperService
 }
 
 // Run is a placeholder for the main application logic.
@@ -25,10 +26,12 @@ func NewShowApp(
 	logging logging.Logger,
 	cfg *config.AppConfig,
 	locator *service.LocationShowService,
+	lk *service.LocationKeeperService,
 ) *App {
 	return &App{
 		Config:         cfg,
-		Logger:         logging,
+		Log:            logging,
 		LocatorService: locator,
+		Keeper:         lk,
 	}
 }

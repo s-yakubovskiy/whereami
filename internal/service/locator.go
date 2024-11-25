@@ -26,3 +26,7 @@ func (s *LocationShowService) ShowLocation(ctx context.Context, req *pb.ShowLoca
 	}
 	return nil, err
 }
+
+func (s *LocationShowService) Init(ctx context.Context, req *pb.InitRequest) (*pb.InitResponse, error) {
+	return nil, nil
+}

@@ -3,6 +3,7 @@ package data
 import (
 	"github.com/google/wire"
 	"github.com/s-yakubovskiy/whereami/internal/config"
+	"github.com/s-yakubovskiy/whereami/internal/data/db"
 	"github.com/s-yakubovskiy/whereami/internal/data/ifconfig"
 	"github.com/s-yakubovskiy/whereami/internal/data/ipapi"
 	"github.com/s-yakubovskiy/whereami/internal/data/ipqualityscore"
@@ -28,10 +29,15 @@ func ProvideIpQualityScoreMock(config *config.ProviderConfigs) (*ipqualityscore.
 	return ipqualityscore.NewIpQualityScoreMock(c.URL, c.APIKey)
 }
 
+func ProvideLocationKeeper(config *config.AppConfig) (*db.LocationKeeper, error) {
+	return db.NewLocationKeeper(config.Database.Path)
+}
+
 var ProviderSet = wire.NewSet(
 	ifconfig.NewPublicIpProvider,
 	ifconfig.NewPublicIpProviderMock,
 	ProvideIpApi,
 	ProvideIpApiMock,
 	ProvideIpQualityScore,
-	ProvideIpQualityScoreMock)
+	ProvideIpQualityScoreMock,
+	ProvideLocationKeeper)

@@ -7,12 +7,14 @@ import (
 	"github.com/google/wire"
 	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/data"
+	"github.com/s-yakubovskiy/whereami/internal/data/db"
 	"github.com/s-yakubovskiy/whereami/internal/data/ifconfig"
 	"github.com/s-yakubovskiy/whereami/internal/data/ipapi"
 	"github.com/s-yakubovskiy/whereami/internal/data/ipqualityscore"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
 	"github.com/s-yakubovskiy/whereami/internal/service"
 	"github.com/s-yakubovskiy/whereami/internal/usecase"
+	"github.com/s-yakubovskiy/whereami/internal/usecase/keeper"
 	"github.com/s-yakubovskiy/whereami/internal/usecase/locator"
 )
 
@@ -35,6 +37,7 @@ func initializeRealShowApp() (*App, func(), error) {
 
 		wire.Bind(new(locator.PublicIpRepo), new(*ifconfig.IfconfigMe)),
 		wire.Bind(new(locator.IpInfoRepo), new(*ipapi.IpApi)),
+		wire.Bind(new(keeper.LocationKeeperRepo), new(*db.LocationKeeper)),
 		wire.Bind(new(locator.IpQualityScoreRepo), new(*ipqualityscore.IpQualityScore)),
 		NewShowApp,
 	)
@@ -52,6 +55,7 @@ func initializeMockShowApp() (*App, func(), error) {
 
 		wire.Bind(new(locator.PublicIpRepo), new(*ifconfig.IfconfigMeMock)),
 		wire.Bind(new(locator.IpInfoRepo), new(*ipapi.IpApiMock)),
+		wire.Bind(new(keeper.LocationKeeperRepo), new(*db.LocationKeeper)),
 
 		wire.Bind(new(locator.IpQualityScoreRepo), new(*ipqualityscore.IpQualityScoreMock)),
 		NewShowApp,

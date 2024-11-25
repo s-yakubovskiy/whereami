@@ -12,6 +12,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/data/ifconfig"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
 	"github.com/s-yakubovskiy/whereami/internal/service"
+	"github.com/s-yakubovskiy/whereami/internal/usecase/keeper"
 	"github.com/s-yakubovskiy/whereami/internal/usecase/locator"
 )
 
@@ -39,7 +40,13 @@ func initializeRealShowApp() (*App, func(), error) {
 	}
 	useCase := locator.NewLocatorUserCase(logger, appConfig, ifconfigMe, ipApi, ipQualityScore)
 	locationShowService := service.NewLocationShowService(useCase)
-	app := NewShowApp(logger, appConfig, locationShowService)
+	locationKeeper, err := data.ProvideLocationKeeper(appConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper)
+	locationKeeperService := service.NewLocationKeeperService(keeperUseCase)
+	app := NewShowApp(logger, appConfig, locationShowService, locationKeeperService)
 	return app, func() {
 	}, nil
 }
@@ -66,7 +73,13 @@ func initializeMockShowApp() (*App, func(), error) {
 	}
 	useCase := locator.NewLocatorUserCase(logger, appConfig, ifconfigMeMock, ipApiMock, ipQualityScoreMock)
 	locationShowService := service.NewLocationShowService(useCase)
-	app := NewShowApp(logger, appConfig, locationShowService)
+	locationKeeper, err := data.ProvideLocationKeeper(appConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper)
+	locationKeeperService := service.NewLocationKeeperService(keeperUseCase)
+	app := NewShowApp(logger, appConfig, locationShowService, locationKeeperService)
 	return app, func() {
 	}, nil
 }

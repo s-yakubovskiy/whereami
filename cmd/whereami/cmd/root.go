@@ -1,11 +1,23 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 
 	// "github.com/s-yakubovskiy/whereami/internal/config"
+	"github.com/s-yakubovskiy/whereami/internal/config"
+	"github.com/s-yakubovskiy/whereami/internal/di"
 	"github.com/spf13/cobra"
+)
+
+var (
+	fullShow    bool
+	locationApi string
+	publicIpApi string
+	publicIP    string
+	gpsEnabled  bool
+	gpsProvider string
 )
 
 var rootCmd = &cobra.Command{
@@ -21,69 +33,25 @@ var rootCmd = &cobra.Command{
 			fmt.Println("  Commit:", Commit)
 			os.Exit(0)
 		}
-		// 	if locationApi != "" {
-		// 		cfg.MainProvider = locationApi
-		// 	}
-		// 	if publicIpApi != "" {
-		// 		cfg.ProviderConfigs.PublicIpProvider = publicIpApi
-		// 	}
-		// 	if publicIP != "" {
-		// 		cfg.PublicIP = publicIP
-		// 	}
-
-		// 	factory := &servicefactory.DefaultServiceFactory{}
-
-		// 	ifconfig, err := factory.CreateIpProviderService(cfg.ProviderConfigs.Ifconfig)
-		// 	if err != nil {
-		// 		log.Fatalf("Failed to create IP configuration: %v", err)
-		// 	}
-
-		// 	ipapi, err := factory.CreateLocationService(cfg.ProviderConfigs.IpApi)
-		// 	if err != nil {
-		// 		log.Fatalf("Failed to create primary location service: %v", err)
-		// 	}
-		// 	ipdata, err := factory.CreateLocationService(cfg.ProviderConfigs.IpData)
-		// 	if err != nil {
-		// 		log.Fatalf("Failed to create secondary location service: %v", err)
-		// 	}
-		// 	ipquality, err := factory.CreateQualityService(cfg.ProviderConfigs.IpQualityScore)
-		// 	if err != nil {
-		// 		log.Fatalf("Failed to create IP quality service: %v", err)
-		// 	}
-
-		// 	// Use the FallbackLocationService to manage primary and secondary services
-		// 	locationService := apimanager.NewFallbackLocationService(ipapi, ipdata)
-		// 	client := apimanager.NewAPIManager(ifconfig, locationService, ipquality)
-
-		// 	dbcli, err := dbclient.NewSQLiteDB(cfg.Database)
-		// 	if err != nil {
-		// 		log.Fatalf("Failed to open database: %v", err)
-		// 	}
-		// 	dumper, err := dumper.NewDumperJSON(dbcli)
-		// 	if err != nil {
-		// 		log.Fatalf("Failed to create dumper: %v", err)
-		// 	}
-
-		// 	var gps gpsdfetcher.GPSInterface
-		// 	if cfg.GPSConfig.Enabled || gpsEnabled {
-		// 		cfg.GPSConfig.Enabled = true
-		// 		if gpsProvider == "adb" {
-		// 			gps = gpsdfetcher.NewGPSAdbFetcher()
-		// 		} else if gpsProvider == "file" {
-		// 			gps = gpsdfetcher.NewGPSDFileFetcher(cfg.GPSConfig.Timeout)
-		// 		} else {
-		// 			gps = gpsdfetcher.NewGPSDFetcher(cfg.GPSConfig.Timeout)
-		// 		}
-		// 	}
-
-		// 	// lCfg := whereami.NewConfig(cfg.ProviderConfigs.IpQualityScore.Enabled, ipLookup, cfg.GPSConfig.Enabled)
-		// 	locator := whereami.NewLocator(client, dbcli, dumper, gps, cfg)
-		// 	if fullShow {
-		// 		locator.ShowFull()
-		// 	} else {
-		// 		locator.Show()
-		// 	}
 	},
+}
+
+func initializeApp(cmd *cobra.Command) (*di.App, context.Context, context.CancelFunc, error) {
+	isMockEnv := os.Getenv("USE_MOCK") == "true"
+	app, cleanup, err := di.InitializeShowApp(isMockEnv)
+	if err != nil {
+		fmt.Fprintf(cmd.ErrOrStderr(), "Error initializing application: %v\n", err)
+		return nil, nil, nil, err
+	}
+
+	config.ApplyOptions(
+		config.WithPublicIP(publicIP),
+	)
+	// app.Log.PrettyPrint(app.Config)
+
+	ctx, cancel := context.WithTimeout(context.Background(), ASYNC_TIMEOUT)
+	introduce()
+	return app, ctx, func() { cleanup(); cancel() }, nil
 }
 
 func init() {
