@@ -18,6 +18,11 @@ type UseCase struct {
 	cfg *config.AppConfig
 	log logging.Logger
 	lk  LocationKeeperRepo
+	nl  NetLinksRepo
+}
+
+type NetLinksRepo interface {
+	GetVPN([]string) (bool, error)
 }
 
 type LocationData struct {
@@ -38,14 +43,20 @@ type LocationKeeperRepo interface {
 	LocationKeeperVpnRepo
 	LocationKeeperDumperRepo
 	InitDb(ctx context.Context) error
+	StoreLocation(*entity.Location) error
 }
 
-func NewLocationKeeperUseCase(log logging.Logger, cfg *config.AppConfig, lk LocationKeeperRepo) *UseCase {
+func NewLocationKeeperUseCase(log logging.Logger, cfg *config.AppConfig, lk LocationKeeperRepo, nl NetLinksRepo) *UseCase {
 	return &UseCase{
 		cfg: cfg,
 		log: log,
 		lk:  lk,
+		nl:  nl,
 	}
+}
+
+func (uc *UseCase) GetVPN(vpninterfaces []string) (bool, error) {
+	return uc.nl.GetVPN(vpninterfaces)
 }
 
 func (uc *UseCase) InitDb(ctx context.Context) error {
@@ -112,6 +123,34 @@ func (uc *UseCase) ImportLocations(ctx context.Context, importPath string) error
 	}
 	if err := uc.lk.ImportLocations(data.Data); err != nil {
 		log.Fatal(err)
+	}
+	return nil
+}
+
+func (uc *UseCase) StoreLocation(ctx context.Context, location *entity.Location) error {
+	uc.log.Debug("UseCase StoreLocation")
+	vpninterfaces, err := uc.lk.ListVPNInterfaces()
+	if err != nil {
+		uc.log.Error(err.Error())
+	}
+
+	vpn, err := uc.nl.GetVPN(vpninterfaces)
+	if err != nil {
+		uc.log.Error(err.Error())
+	}
+	if vpn {
+		location.Vpn = true
+	}
+	// TODO: update it later
+	// if l.cfg.IpQuality {
+	// 	l.client.AddIPQuality(location, ip)
+	// }
+	if err := uc.lk.StoreLocation(location); err != nil {
+		if err.Error() == "The database already contains this record." {
+			uc.log.Warn(err.Error())
+		} else {
+			uc.log.Error(err.Error())
+		}
 	}
 	return nil
 }

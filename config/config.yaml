@@ -1,6 +1,7 @@
 # Logging settings
 logging:
-  level: info # Could be debug, info, warn, error
+  # level: info # Could be debug, info, warn, error
+  level: debug # Could be debug, info, warn, error
   format: console # Could be json or console
   output: stdout # Could be stdout, stderr, or a file path like /var/log/app.log
 

@@ -10,6 +10,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/data"
 	"github.com/s-yakubovskiy/whereami/internal/data/ifconfig"
+	"github.com/s-yakubovskiy/whereami/internal/data/vpn"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
 	"github.com/s-yakubovskiy/whereami/internal/service"
 	"github.com/s-yakubovskiy/whereami/internal/usecase/keeper"
@@ -44,7 +45,8 @@ func initializeRealShowApp() (*App, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper)
+	netLinksLister := vpn.NewNetLinkLister()
+	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper, netLinksLister)
 	locationKeeperService := service.NewLocationKeeperService(keeperUseCase)
 	app := NewShowApp(logger, appConfig, locationShowService, locationKeeperService)
 	return app, func() {
@@ -77,7 +79,8 @@ func initializeMockShowApp() (*App, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper)
+	netLinksLister := vpn.NewNetLinkLister()
+	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper, netLinksLister)
 	locationKeeperService := service.NewLocationKeeperService(keeperUseCase)
 	app := NewShowApp(logger, appConfig, locationShowService, locationKeeperService)
 	return app, func() {

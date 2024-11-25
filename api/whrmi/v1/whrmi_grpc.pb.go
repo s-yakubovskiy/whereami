@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	LocationService_ShowLocation_FullMethodName = "/api.whrmi.v1.LocationService/ShowLocation"
+	LocationService_GetLocation_FullMethodName  = "/api.whrmi.v1.LocationService/GetLocation"
 )
 
 // LocationServiceClient is the client API for LocationService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LocationServiceClient interface {
 	ShowLocation(ctx context.Context, in *ShowLocationRequest, opts ...grpc.CallOption) (*ShowLocationResponse, error)
+	GetLocation(ctx context.Context, in *GetLocationRequest, opts ...grpc.CallOption) (*GetLocationResponse, error)
 }
 
 type locationServiceClient struct {
@@ -47,11 +49,22 @@ func (c *locationServiceClient) ShowLocation(ctx context.Context, in *ShowLocati
 	return out, nil
 }
 
+func (c *locationServiceClient) GetLocation(ctx context.Context, in *GetLocationRequest, opts ...grpc.CallOption) (*GetLocationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetLocationResponse)
+	err := c.cc.Invoke(ctx, LocationService_GetLocation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LocationServiceServer is the server API for LocationService service.
 // All implementations must embed UnimplementedLocationServiceServer
 // for forward compatibility.
 type LocationServiceServer interface {
 	ShowLocation(context.Context, *ShowLocationRequest) (*ShowLocationResponse, error)
+	GetLocation(context.Context, *GetLocationRequest) (*GetLocationResponse, error)
 	mustEmbedUnimplementedLocationServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedLocationServiceServer struct{}
 
 func (UnimplementedLocationServiceServer) ShowLocation(context.Context, *ShowLocationRequest) (*ShowLocationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ShowLocation not implemented")
+}
+func (UnimplementedLocationServiceServer) GetLocation(context.Context, *GetLocationRequest) (*GetLocationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLocation not implemented")
 }
 func (UnimplementedLocationServiceServer) mustEmbedUnimplementedLocationServiceServer() {}
 func (UnimplementedLocationServiceServer) testEmbeddedByValue()                         {}
@@ -104,6 +120,24 @@ func _LocationService_ShowLocation_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LocationService_GetLocation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLocationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LocationServiceServer).GetLocation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LocationService_GetLocation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LocationServiceServer).GetLocation(ctx, req.(*GetLocationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LocationService_ServiceDesc is the grpc.ServiceDesc for LocationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var LocationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ShowLocation",
 			Handler:    _LocationService_ShowLocation_Handler,
+		},
+		{
+			MethodName: "GetLocation",
+			Handler:    _LocationService_GetLocation_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -126,6 +164,7 @@ const (
 	LocationKeeperService_ListVpnInterfaces_FullMethodName = "/api.whrmi.v1.LocationKeeperService/ListVpnInterfaces"
 	LocationKeeperService_ExportLocations_FullMethodName   = "/api.whrmi.v1.LocationKeeperService/ExportLocations"
 	LocationKeeperService_ImportLocations_FullMethodName   = "/api.whrmi.v1.LocationKeeperService/ImportLocations"
+	LocationKeeperService_StoreLocation_FullMethodName     = "/api.whrmi.v1.LocationKeeperService/StoreLocation"
 )
 
 // LocationKeeperServiceClient is the client API for LocationKeeperService service.
@@ -137,6 +176,7 @@ type LocationKeeperServiceClient interface {
 	ListVpnInterfaces(ctx context.Context, in *ListVpnInterfacesRequest, opts ...grpc.CallOption) (*ListVpnInterfacesResponse, error)
 	ExportLocations(ctx context.Context, in *ExportLocationsRequest, opts ...grpc.CallOption) (*ExportLocationsResponse, error)
 	ImportLocations(ctx context.Context, in *ImportLocationsRequest, opts ...grpc.CallOption) (*ImportLocationsResponse, error)
+	StoreLocation(ctx context.Context, in *StoreLocationRequest, opts ...grpc.CallOption) (*StoreLocationResponse, error)
 }
 
 type locationKeeperServiceClient struct {
@@ -197,6 +237,16 @@ func (c *locationKeeperServiceClient) ImportLocations(ctx context.Context, in *I
 	return out, nil
 }
 
+func (c *locationKeeperServiceClient) StoreLocation(ctx context.Context, in *StoreLocationRequest, opts ...grpc.CallOption) (*StoreLocationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StoreLocationResponse)
+	err := c.cc.Invoke(ctx, LocationKeeperService_StoreLocation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LocationKeeperServiceServer is the server API for LocationKeeperService service.
 // All implementations must embed UnimplementedLocationKeeperServiceServer
 // for forward compatibility.
@@ -206,6 +256,7 @@ type LocationKeeperServiceServer interface {
 	ListVpnInterfaces(context.Context, *ListVpnInterfacesRequest) (*ListVpnInterfacesResponse, error)
 	ExportLocations(context.Context, *ExportLocationsRequest) (*ExportLocationsResponse, error)
 	ImportLocations(context.Context, *ImportLocationsRequest) (*ImportLocationsResponse, error)
+	StoreLocation(context.Context, *StoreLocationRequest) (*StoreLocationResponse, error)
 	mustEmbedUnimplementedLocationKeeperServiceServer()
 }
 
@@ -230,6 +281,9 @@ func (UnimplementedLocationKeeperServiceServer) ExportLocations(context.Context,
 }
 func (UnimplementedLocationKeeperServiceServer) ImportLocations(context.Context, *ImportLocationsRequest) (*ImportLocationsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ImportLocations not implemented")
+}
+func (UnimplementedLocationKeeperServiceServer) StoreLocation(context.Context, *StoreLocationRequest) (*StoreLocationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StoreLocation not implemented")
 }
 func (UnimplementedLocationKeeperServiceServer) mustEmbedUnimplementedLocationKeeperServiceServer() {}
 func (UnimplementedLocationKeeperServiceServer) testEmbeddedByValue()                               {}
@@ -342,6 +396,24 @@ func _LocationKeeperService_ImportLocations_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LocationKeeperService_StoreLocation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StoreLocationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LocationKeeperServiceServer).StoreLocation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LocationKeeperService_StoreLocation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LocationKeeperServiceServer).StoreLocation(ctx, req.(*StoreLocationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LocationKeeperService_ServiceDesc is the grpc.ServiceDesc for LocationKeeperService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -368,6 +440,10 @@ var LocationKeeperService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ImportLocations",
 			Handler:    _LocationKeeperService_ImportLocations_Handler,
+		},
+		{
+			MethodName: "StoreLocation",
+			Handler:    _LocationKeeperService_StoreLocation_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -8,6 +8,7 @@ option java_package = "api.whrmi.v1";
 
 service LocationService {
     rpc ShowLocation (ShowLocationRequest) returns (ShowLocationResponse);
+    rpc GetLocation (GetLocationRequest) returns (GetLocationResponse);
 }
 
 service LocationKeeperService {
@@ -16,13 +17,50 @@ service LocationKeeperService {
     rpc ListVpnInterfaces (ListVpnInterfacesRequest) returns (ListVpnInterfacesResponse);
     rpc ExportLocations (ExportLocationsRequest) returns (ExportLocationsResponse);
     rpc ImportLocations (ImportLocationsRequest) returns (ImportLocationsResponse);
+    rpc StoreLocation (StoreLocationRequest) returns (StoreLocationResponse);
+}
+
+message Location {
+    string ip = 1;
+    string country = 2;
+    string country_code = 3;
+    string region = 4;
+    string region_code = 5;
+    string city = 6;
+    string timezone = 7;
+    string zip = 8;
+    string flag = 9;
+    string isp = 10;
+    string asn = 11;
+    double latitude = 12;
+    double longitude = 13;
+    string date = 14;
+    bool vpn = 15;
+    string comment = 16;
+    LocationScores scores = 17;
+    GPSReport gps = 18;
+    string map = 19;
+}
+
+message LocationScores {
+    int32 fraud_score = 1;
+    bool is_crawler = 2;
+    string host = 3;
+    bool proxy = 4;
+    bool vpn = 5;
+    bool tor = 6;
+    bool recent_abuse = 7;
+    bool bot_status = 8;
+}
+
+message GPSReport {
+    double latitude = 1;
+    double longitude = 2;
+    double altitude = 3;
+    string url = 4;
 }
 
 message ShowLocationRequest {
-    string status = 1;
-}
-
-message ShowLocationResponse {
     string status = 1;
 }
 
@@ -49,3 +87,20 @@ message ImportLocationsRequest {
    string importpath = 1;
 }
 message ImportLocationsResponse {}
+
+message StoreLocationRequest {
+    Location location = 1;
+}
+message StoreLocationResponse {
+}
+
+message GetLocationRequest {
+    string ip = 1;
+}
+message GetLocationResponse {
+    Location location = 1;
+}
+
+message ShowLocationResponse {
+    Location location = 1;
+}

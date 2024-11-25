@@ -73,7 +73,20 @@ func NewLocatorUserCase(log logging.Logger, cfg *config.AppConfig, locationRepo 
 	}
 }
 
-func (uc *UseCase) ShowLocation(ctx context.Context) error {
+func (uc *UseCase) ShowLocation(ctx context.Context) (*entity.Location, error) {
+	location, err := uc.getLocation(ctx)
+	if err != nil {
+		return nil, err
+	}
+	uc.Output(location, categories, orderedCategories)
+	return location, nil
+}
+
+func (uc *UseCase) GetLocation(ctx context.Context) (*entity.Location, error) {
+	return uc.getLocation(ctx)
+}
+
+func (uc *UseCase) getLocation(ctx context.Context) (*entity.Location, error) {
 	var ip string
 	var err error
 
@@ -103,6 +116,5 @@ func (uc *UseCase) ShowLocation(ctx context.Context) error {
 		location.Scores = *quality
 	}
 	location.Comment += ". Using public ip provider: <tbd>"
-	uc.Output(location, categories, orderedCategories)
-	return nil
+	return location, nil
 }

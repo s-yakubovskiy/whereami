@@ -11,6 +11,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/data/ifconfig"
 	"github.com/s-yakubovskiy/whereami/internal/data/ipapi"
 	"github.com/s-yakubovskiy/whereami/internal/data/ipqualityscore"
+	"github.com/s-yakubovskiy/whereami/internal/data/vpn"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
 	"github.com/s-yakubovskiy/whereami/internal/service"
 	"github.com/s-yakubovskiy/whereami/internal/usecase"
@@ -35,6 +36,7 @@ func initializeRealShowApp() (*App, func(), error) {
 		usecase.ProviderSet,
 		data.ProviderSet,
 
+		wire.Bind(new(keeper.NetLinksRepo), new(*vpn.NetLinksLister)),
 		wire.Bind(new(locator.PublicIpRepo), new(*ifconfig.IfconfigMe)),
 		wire.Bind(new(locator.IpInfoRepo), new(*ipapi.IpApi)),
 		wire.Bind(new(keeper.LocationKeeperRepo), new(*db.LocationKeeper)),
@@ -53,6 +55,7 @@ func initializeMockShowApp() (*App, func(), error) {
 		usecase.ProviderSet,
 		data.ProviderSet,
 
+		wire.Bind(new(keeper.NetLinksRepo), new(*vpn.NetLinksLister)),
 		wire.Bind(new(locator.PublicIpRepo), new(*ifconfig.IfconfigMeMock)),
 		wire.Bind(new(locator.IpInfoRepo), new(*ipapi.IpApiMock)),
 		wire.Bind(new(keeper.LocationKeeperRepo), new(*db.LocationKeeper)),

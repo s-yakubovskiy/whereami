@@ -7,6 +7,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/data/ifconfig"
 	"github.com/s-yakubovskiy/whereami/internal/data/ipapi"
 	"github.com/s-yakubovskiy/whereami/internal/data/ipqualityscore"
+	"github.com/s-yakubovskiy/whereami/internal/data/vpn"
 )
 
 func ProvideIpApi(config *config.ProviderConfigs) (*ipapi.IpApi, error) {
@@ -34,6 +35,7 @@ func ProvideLocationKeeper(config *config.AppConfig) (*db.LocationKeeper, error)
 }
 
 var ProviderSet = wire.NewSet(
+	vpn.NewNetLinkLister,
 	ifconfig.NewPublicIpProvider,
 	ifconfig.NewPublicIpProviderMock,
 	ProvideIpApi,
