@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 
-	"github.com/s-yakubovskiy/whereami/internal/common"
 	"github.com/s-yakubovskiy/whereami/internal/entity"
 )
 
@@ -70,7 +70,7 @@ func ConvertIpApiToLocation(ip *IpInfo) (*entity.Location, error) {
 		City:        ip.City,
 		Timezone:    ip.Timezone,
 		Zip:         ip.Zip,
-		Flag:        common.CountryCodeToEmoji(ip.CountryCode),
+		Flag:        CountryCodeToEmoji(ip.CountryCode),
 		Isp:         ip.ISP, // Assuming ASN Name represents the ISP
 		Latitude:    ip.Lat,
 		Longitude:   ip.Lon,
@@ -78,4 +78,18 @@ func ConvertIpApiToLocation(ip *IpInfo) (*entity.Location, error) {
 		Vpn:         false,
 		Comment:     "Fetched with ipapi provider",
 	}, nil
+}
+
+func CountryCodeToEmoji(code string) string {
+	const offset = 127397 // Offset between uppercase ASCII and regional indicator symbols
+	var emoji strings.Builder
+
+	for _, r := range strings.ToUpper(code) {
+		if r < 'A' || r > 'Z' {
+			return "" // Invalid code
+		}
+		emoji.WriteRune(rune(r) + offset)
+	}
+
+	return emoji.String()
 }

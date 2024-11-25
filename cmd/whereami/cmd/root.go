@@ -6,10 +6,13 @@ import (
 	"os"
 
 	// "github.com/s-yakubovskiy/whereami/internal/config"
+	"github.com/mbndr/figlet4go"
 	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/di"
 	"github.com/spf13/cobra"
 )
+
+const appName = "whrmi"
 
 // version overrides
 var (
@@ -42,6 +45,21 @@ var rootCmd = &cobra.Command{
 			os.Exit(0)
 		}
 	},
+}
+
+func introduce() {
+	ascii := figlet4go.NewAsciiRender()
+
+	// Adding the colors to RenderOptions
+	options := figlet4go.NewRenderOptions()
+	options.FontColor = []figlet4go.Color{
+		figlet4go.ColorMagenta,
+		figlet4go.ColorCyan,
+	}
+
+	renderStr, _ := ascii.RenderOpts(appName, options)
+	fmt.Print(renderStr)
+	fmt.Println("    ... getting your location data ...")
 }
 
 func initializeApp(cmd *cobra.Command) (*di.App, context.Context, context.CancelFunc, error) {
