@@ -5,6 +5,7 @@ import (
 
 	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
+	"github.com/s-yakubovskiy/whereami/internal/server"
 	"github.com/s-yakubovskiy/whereami/internal/service"
 )
 
@@ -16,6 +17,7 @@ type App struct {
 	Config         *config.AppConfig
 	LocatorService *service.LocationShowService
 	Keeper         *service.LocationKeeperService
+	Gs             *server.GrpcSrv
 }
 
 // Run is a placeholder for the main application logic.
@@ -34,11 +36,13 @@ func NewShowApp(
 	cfg *config.AppConfig,
 	locator *service.LocationShowService,
 	lk *service.LocationKeeperService,
+	gs *server.GrpcSrv,
 ) *App {
 	return &App{
 		Config:         cfg,
 		Log:            logging,
 		LocatorService: locator,
 		Keeper:         lk,
+		Gs:             gs,
 	}
 }

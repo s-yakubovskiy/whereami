@@ -28,7 +28,6 @@ var (
 )
 
 func init() {
-	showIntro = false
 	rootCmd.AddCommand(daemonCmd)
 }
 
@@ -37,6 +36,7 @@ func initializeAppOnce(cmd *cobra.Command) error {
 	initOnce.Do(func() {
 		app, _, _, err = initializeApp(cmd)
 	})
+	go app.Gs.ServeSync()
 	return err
 }
 
@@ -44,6 +44,7 @@ func initializeAppOnce(cmd *cobra.Command) error {
 func daemonRun(cmd *cobra.Command, args []string) {
 	cfg := config.Cfg
 
+	showIntro = false
 	err := initializeAppOnce(cmd)
 	if err != nil {
 		log.Fatalf("Failed to initialize application: %v", err)
@@ -78,6 +79,7 @@ func performTask(task config.CrontabTask) { // assuming task is of some TaskType
 	if err != nil {
 		app.Log.Printf("Failed to save location: %v", err)
 	}
+	ctx.Done()
 }
 
 // Handle system signals for graceful shutdown

@@ -92,3 +92,11 @@ func init() {
 	rootCmd.Flags().StringVarP(&gpsProvider, "gps-provider", "g", "", "Select GPS provider: [adb, file, gpsd (default)]")
 	rootCmd.Flags().StringVarP(&publicIP, "ip", "", "", "Specify public IP to lookup info")
 }
+
+// Execute executes the root command.
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}

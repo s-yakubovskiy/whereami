@@ -27,7 +27,12 @@ func ProvideProviderConfigs(cfg *AppConfig) *ProviderConfigs {
 	return &cfg.ProviderConfigs
 }
 
+func ProvideServerConfig(cfg *AppConfig) *Server {
+	return &cfg.Server
+}
+
 var ProviderSet = wire.NewSet(
 	ProvideConfig,
 	ProvideProviderConfigs,
-	ProvideLoggingConfig)
+	ProvideLoggingConfig,
+	ProvideServerConfig)

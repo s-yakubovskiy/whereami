@@ -12,6 +12,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/data/ifconfig"
 	"github.com/s-yakubovskiy/whereami/internal/data/vpn"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
+	"github.com/s-yakubovskiy/whereami/internal/server"
 	"github.com/s-yakubovskiy/whereami/internal/service"
 	"github.com/s-yakubovskiy/whereami/internal/usecase/keeper"
 	"github.com/s-yakubovskiy/whereami/internal/usecase/locator"
@@ -48,7 +49,13 @@ func initializeRealShowApp() (*App, func(), error) {
 	netLinksLister := vpn.NewNetLinkLister()
 	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper, netLinksLister)
 	locationKeeperService := service.NewLocationKeeperService(keeperUseCase)
-	app := NewShowApp(logger, appConfig, locationShowService, locationKeeperService)
+	configServer := config.ProvideServerConfig(appConfig)
+	zoshService := service.NewZoshService()
+	grpcSrv, err := server.NewGrpcSrv(configServer, logger, zoshService)
+	if err != nil {
+		return nil, nil, err
+	}
+	app := NewShowApp(logger, appConfig, locationShowService, locationKeeperService, grpcSrv)
 	return app, func() {
 	}, nil
 }
@@ -82,7 +89,13 @@ func initializeMockShowApp() (*App, func(), error) {
 	netLinksLister := vpn.NewNetLinkLister()
 	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper, netLinksLister)
 	locationKeeperService := service.NewLocationKeeperService(keeperUseCase)
-	app := NewShowApp(logger, appConfig, locationShowService, locationKeeperService)
+	configServer := config.ProvideServerConfig(appConfig)
+	zoshService := service.NewZoshService()
+	grpcSrv, err := server.NewGrpcSrv(configServer, logger, zoshService)
+	if err != nil {
+		return nil, nil, err
+	}
+	app := NewShowApp(logger, appConfig, locationShowService, locationKeeperService, grpcSrv)
 	return app, func() {
 	}, nil
 }

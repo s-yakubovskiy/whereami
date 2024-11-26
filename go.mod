@@ -19,6 +19,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stratoberry/go-gpsd v1.3.0
 	github.com/vishvananda/netlink v1.3.0
+	google.golang.org/genproto/googleapis/api v0.0.0-20240528184218-531527333157
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.1
 	modernc.org/sqlite v1.34.1

@@ -42,10 +42,22 @@ install-grpc:
 # Generate gRPC code from proto files
 generate-proto: install-grpc
 	$(PROTOC) --proto_path=$(PROTO_DIR) \
+		--proto_path=./third_party \
 		--go_out=$(PROTO_OUT) --go_opt=paths=source_relative \
 		--go-grpc_out=$(PROTO_OUT) --go-grpc_opt=paths=source_relative \
 		$(PROTO_FILE)
 
+
+# api:
+# 	protoc --proto_path=./api \
+# 	       --proto_path=./third_party \
+#  	       --go_out=paths=source_relative:./api \
+#  	       --go-http_out=paths=source_relative:./api \
+#  	       --go-grpc_out=paths=source_relative:./api \
+#  	       --go-errors_out=paths=source_relative:./api \
+# 	       --openapi_out=fq_schema_naming=true,default_response=false:. \
+# 	       --validate_out=paths=source_relative,lang=go:./api \
+# 	       $(API_PROTO_FILES)
 
 # build
 build:

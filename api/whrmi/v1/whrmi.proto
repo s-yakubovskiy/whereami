@@ -6,6 +6,10 @@ option go_package = "github.com/s-yakubovskiy/whereami/api/whrmi/v1;whrmi";
 option java_multiple_files = true;
 option java_package = "api.whrmi.v1";
 
+import "google/api/annotations.proto";
+// import "validate/validate.proto";
+// import "google/protobuf/timestamp.proto";
+
 service LocationService {
     rpc ShowLocation (ShowLocationRequest) returns (ShowLocationResponse);
     rpc GetLocation (GetLocationRequest) returns (GetLocationResponse);
@@ -19,6 +23,21 @@ service LocationKeeperService {
     rpc ImportLocations (ImportLocationsRequest) returns (ImportLocationsResponse);
     rpc StoreLocation (StoreLocationRequest) returns (StoreLocationResponse);
 }
+
+service ZoshService {
+  rpc Live (LiveRequest) returns (LiveResponse) {
+    option (google.api.http) = {
+      get: "v1/live"
+      response_body: "*"
+    };
+  };
+}
+
+message LiveRequest {}
+message LiveResponse {
+    string message = 1;
+}
+
 
 message Location {
     string ip = 1;

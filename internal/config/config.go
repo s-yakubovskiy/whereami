@@ -24,6 +24,21 @@ type AppConfig struct {
 	PublicIP         string          `mapstructure:"public_ip" yaml:"public_ip"`
 	ProviderConfigs  ProviderConfigs `mapstructure:"provider_configs" yaml:"provider_configs"`
 	GPSConfig        GPSConfig       `mapstructure:"gps" yaml:"gps"`
+	Server           Server          `mapstructure:"server"`
+}
+
+type Server struct {
+	HTTP HTTP `mapstructure:"http"`
+	GRPC GRPC `mapstructure:"grpc"`
+}
+type HTTP struct {
+	Address string        `mapstructure:"address"`
+	Timeout time.Duration `mapstructure:"timeout"`
+}
+
+type GRPC struct {
+	Address string        `mapstructure:"address"`
+	Timeout time.Duration `mapstructure:"timeout"`
 }
 
 func WithPublicIP(ip string) Option {
