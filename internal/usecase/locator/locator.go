@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/s-yakubovskiy/whereami/internal/config"
-	// "github.com/s-yakubovskiy/whereami/internal/contracts"
 
 	"github.com/s-yakubovskiy/whereami/internal/entity"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
+	"github.com/s-yakubovskiy/whereami/internal/metrics"
 )
 
 var ASYNC_TIMEOUT = 35 * time.Second
@@ -48,6 +48,7 @@ type UseCase struct {
 	ipInfoRepo         IpInfoRepo
 	ipQualityScoreRepo IpQualityScoreRepo
 	log                logging.Logger
+	m                  metrics.Metrics
 }
 
 type IpInfoRepo interface {
@@ -63,22 +64,29 @@ type PublicIpRepo interface {
 	GetIP() (string, error)
 }
 
-func NewLocatorUserCase(log logging.Logger, cfg *config.AppConfig, locationRepo PublicIpRepo, ipInfoRepo IpInfoRepo, ipQualityRepo IpQualityScoreRepo) *UseCase {
+func NewLocatorUserCase(log logging.Logger, cfg *config.AppConfig, locationRepo PublicIpRepo, ipInfoRepo IpInfoRepo, ipQualityRepo IpQualityScoreRepo, m metrics.Metrics) *UseCase {
+	// Register metrics specific to this use case
+	m.RegisterCounter("show_location_count", "Counts custom ShowLocation executions", []string{"status"})
+	m.RegisterHistogram("show_location_latency", "Tracks custom ShowLocation latencies", []string{"task_type"})
 	return &UseCase{
 		cfg:                cfg,
 		log:                log,
 		publicIpRepo:       locationRepo,
 		ipInfoRepo:         ipInfoRepo,
 		ipQualityScoreRepo: ipQualityRepo,
+		m:                  m,
 	}
 }
 
 func (uc *UseCase) ShowLocation(ctx context.Context) (*entity.Location, error) {
+	start := time.Now()
 	location, err := uc.getLocation(ctx)
 	if err != nil {
 		return nil, err
 	}
 	uc.Output(location, categories, orderedCategories)
+	uc.m.IncrementCounter("show_location_count", map[string]string{"status": "success"})
+	uc.m.ObserveLatency("show_location_latency", time.Since(start), map[string]string{"task_type": "ShowLocation"})
 	return location, nil
 }
 

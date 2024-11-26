@@ -13,6 +13,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/data/ipqualityscore"
 	"github.com/s-yakubovskiy/whereami/internal/data/vpn"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
+	"github.com/s-yakubovskiy/whereami/internal/metrics"
 	"github.com/s-yakubovskiy/whereami/internal/server"
 	"github.com/s-yakubovskiy/whereami/internal/service"
 	"github.com/s-yakubovskiy/whereami/internal/usecase"
@@ -37,6 +38,7 @@ func initializeRealShowApp() (*App, func(), error) {
 		usecase.ProviderSet,
 		data.ProviderSet,
 		server.ProviderSet,
+		metrics.ProviderSet,
 
 		wire.Bind(new(keeper.NetLinksRepo), new(*vpn.NetLinksLister)),
 		wire.Bind(new(locator.PublicIpRepo), new(*ifconfig.IfconfigMe)),
@@ -57,6 +59,7 @@ func initializeMockShowApp() (*App, func(), error) {
 		usecase.ProviderSet,
 		data.ProviderSet,
 		server.ProviderSet,
+		metrics.ProviderSet,
 
 		wire.Bind(new(keeper.NetLinksRepo), new(*vpn.NetLinksLister)),
 		wire.Bind(new(locator.PublicIpRepo), new(*ifconfig.IfconfigMeMock)),

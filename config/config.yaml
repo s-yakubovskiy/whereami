@@ -70,11 +70,8 @@ crontab_tasks:
   - schedule: "@every 10s"
 
 server:
-  http:
-    address: 0.0.0.0:8010
-    timeout: 2s
   grpc:
-    address: 0.0.0.0:8012
+    address: 0.0.0.0:9010
     timeout: 2s
   metrics:
-    address: 0.0.0.0:8018
+    address: 0.0.0.0:9011

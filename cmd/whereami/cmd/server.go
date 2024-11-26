@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func testRun(cmd *cobra.Command, args []string) {
+func serverRun(cmd *cobra.Command, args []string) {
 	app, ctx, cleanup, err := initializeApp(cmd)
 	if err != nil {
 		return
@@ -34,13 +34,13 @@ func testRun(cmd *cobra.Command, args []string) {
 	app.Log.Info("Server shutdown gracefully")
 }
 
-var testCmd = &cobra.Command{
-	Use:   "test",
-	Short: "Test the WhereAmI application",
-	Long:  `Just testing.`,
-	Run:   testRun,
+var serverCmd = &cobra.Command{
+	Use:   "server",
+	Short: "server the WhereAmI application",
+	Long:  `Just servering.`,
+	Run:   serverRun,
 }
 
 func init() {
-	rootCmd.AddCommand(testCmd)
+	rootCmd.AddCommand(serverCmd)
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/data/ifconfig"
 	"github.com/s-yakubovskiy/whereami/internal/data/vpn"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
+	"github.com/s-yakubovskiy/whereami/internal/metrics"
 	"github.com/s-yakubovskiy/whereami/internal/server"
 	"github.com/s-yakubovskiy/whereami/internal/service"
 	"github.com/s-yakubovskiy/whereami/internal/usecase/keeper"
@@ -40,14 +41,15 @@ func initializeRealShowApp() (*App, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	useCase := locator.NewLocatorUserCase(logger, appConfig, ifconfigMe, ipApi, ipQualityScore)
+	metricsMetrics := metrics.NewPrometheusMetrics()
+	useCase := locator.NewLocatorUserCase(logger, appConfig, ifconfigMe, ipApi, ipQualityScore, metricsMetrics)
 	locationShowService := service.NewLocationShowService(useCase)
 	locationKeeper, err := data.ProvideLocationKeeper(appConfig)
 	if err != nil {
 		return nil, nil, err
 	}
 	netLinksLister := vpn.NewNetLinkLister()
-	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper, netLinksLister)
+	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper, netLinksLister, metricsMetrics)
 	locationKeeperService := service.NewLocationKeeperService(keeperUseCase)
 	configServer := config.ProvideServerConfig(appConfig)
 	zoshService := service.NewZoshService()
@@ -80,14 +82,15 @@ func initializeMockShowApp() (*App, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	useCase := locator.NewLocatorUserCase(logger, appConfig, ifconfigMeMock, ipApiMock, ipQualityScoreMock)
+	metricsMetrics := metrics.NewPrometheusMetrics()
+	useCase := locator.NewLocatorUserCase(logger, appConfig, ifconfigMeMock, ipApiMock, ipQualityScoreMock, metricsMetrics)
 	locationShowService := service.NewLocationShowService(useCase)
 	locationKeeper, err := data.ProvideLocationKeeper(appConfig)
 	if err != nil {
 		return nil, nil, err
 	}
 	netLinksLister := vpn.NewNetLinkLister()
-	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper, netLinksLister)
+	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper, netLinksLister, metricsMetrics)
 	locationKeeperService := service.NewLocationKeeperService(keeperUseCase)
 	configServer := config.ProvideServerConfig(appConfig)
 	zoshService := service.NewZoshService()

@@ -26,6 +26,7 @@ type Logger interface {
 	Printf(format string, v ...interface{})
 	Sprintf(format string, v ...interface{}) string
 	PrettyPrint(v interface{})
+	SetLogLeverUnsafe(lvl string)
 }
 
 // ZerologLogger implements the Logger interface using zerolog.
@@ -109,4 +110,8 @@ func (l *ZerologLogger) Sprintf(format string, v ...interface{}) string {
 func (l *ZerologLogger) PrettyPrint(v interface{}) {
 	prettyData, _ := json.MarshalIndent(v, "", "  ")
 	l.Debug(string(prettyData))
+}
+
+func (l *ZerologLogger) SetLogLeverUnsafe(lvl string) {
+	zerolog.SetGlobalLevel(logLevelFromString(lvl))
 }

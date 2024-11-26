@@ -26,6 +26,7 @@ func RunShow(cmd *cobra.Command, args []string) {
 	}
 	defer cleanup()
 
+	app.Log.SetLogLeverUnsafe("info")
 	app.LocatorService.ShowLocation(ctx, nil)
 }
 

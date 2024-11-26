@@ -8,24 +8,29 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/config"
 )
 
+func logLevelFromString(logLevel string) zerolog.Level {
+	level := strings.ToLower(logLevel)
+	switch level {
+	case "debug":
+		return zerolog.DebugLevel
+	case "info":
+		return zerolog.InfoLevel
+	case "warn":
+		return zerolog.WarnLevel
+	case "error":
+		return zerolog.ErrorLevel
+	default:
+		return zerolog.InfoLevel
+	}
+}
+
 // ProvideLogger configures and returns a zerolog logger based on the application's configuration.
 func ProvideLogger(cfg *config.AppConfig) Logger {
 	var logger zerolog.Logger
 
 	// Set the log level
-	level := strings.ToLower(cfg.Logging.Level)
-	switch level {
-	case "debug":
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	case "info":
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	case "warn":
-		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	case "error":
-		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
-	default:
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	}
+	level := logLevelFromString(strings.ToLower(cfg.Logging.Level))
+	zerolog.SetGlobalLevel(level)
 
 	// Set the log format
 	if strings.ToLower(cfg.Logging.Format) == "json" {

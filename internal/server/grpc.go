@@ -17,11 +17,16 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+const (
+	metricsHandler = "/metrics"
+)
+
 // GrpcSrv wraps the gRPC server and its configuration
 type GrpcSrv struct {
 	grpcServer *grpc.Server
 	listener   net.Listener
 	logger     logging.Logger
+	address    string
 }
 
 // NewGrpcSrv initializes the gRPC server
@@ -46,7 +51,7 @@ func NewGrpcSrv(
 		grpcmiddleware.ChainUnaryServer(
 			grpcMetrics.UnaryServerInterceptor(),  // Prometheus interceptor
 			loggingUnaryServerInterceptor(logger), // Logging interceptor
-			customMetricsInterceptor(logger),      // Custom metrics interceptor
+			// customMetricsInterceptor(logger),      // Custom metrics interceptor
 		),
 	))
 
@@ -66,24 +71,23 @@ func NewGrpcSrv(
 	// Initialize default Prometheus gRPC metrics
 	grpcMetrics.InitializeMetrics(srv)
 
-	// Start Prometheus HTTP server
-	go func() {
-		http.Handle("/metrics", promhttp.Handler())
-		logger.Infof("Metrics server running on %s", cfg.Metrics.Address)
-		if err := http.ListenAndServe(cfg.Metrics.Address, nil); err != nil {
-			logger.Fatalf("Metrics server failed: %v", err)
-		}
-	}()
-
 	return &GrpcSrv{
 		grpcServer: srv,
 		listener:   lis,
 		logger:     logger,
+		address:    cfg.Metrics.Address,
 	}, nil
 }
 
 // ServeSync starts the gRPC server synchronously
 func (cs *GrpcSrv) ServeSync() error {
+	go func() {
+		http.Handle(metricsHandler, promhttp.Handler())
+		cs.logger.Infof("Metrics server running on %s", cs.address)
+		if err := http.ListenAndServe(cs.address, nil); err != nil {
+			cs.logger.Fatalf("Metrics server failed: %v", err)
+		}
+	}()
 	cs.logger.Infof("Starting gRPC server on %s", cs.listener.Addr())
 	if err := cs.grpcServer.Serve(cs.listener); err != nil {
 		cs.logger.Fatalf("failed to serve: %v", err)
@@ -94,10 +98,18 @@ func (cs *GrpcSrv) ServeSync() error {
 
 // Serve starts the gRPC server with graceful shutdown
 func (cs *GrpcSrv) Serve(ctx context.Context) error {
+	// Start Prometheus HTTP server
 	go func() {
 		cs.logger.Infof("Starting gRPC server on %s", cs.listener.Addr())
 		if err := cs.grpcServer.Serve(cs.listener); err != nil {
 			cs.logger.Fatalf("failed to serve: %v", err)
+		}
+	}()
+	go func() {
+		http.Handle(metricsHandler, promhttp.Handler())
+		cs.logger.Infof("Metrics server running on %s", cs.address)
+		if err := http.ListenAndServe(cs.address, nil); err != nil {
+			cs.logger.Fatalf("Metrics server failed: %v", err)
 		}
 	}()
 
@@ -105,22 +117,4 @@ func (cs *GrpcSrv) Serve(ctx context.Context) error {
 	cs.logger.Infof("Stopping gRPC server...")
 	cs.grpcServer.GracefulStop()
 	return nil
-}
-
-// Sample UnaryServerInterceptor implementation for logging
-func loggingUnaryServerInterceptor(logger logging.Logger) grpc.UnaryServerInterceptor {
-	return func(
-		ctx context.Context,
-		req interface{},
-		info *grpc.UnaryServerInfo,
-		handler grpc.UnaryHandler,
-	) (interface{}, error) {
-		logger.Infof("Received request for method: %s", info.FullMethod)
-		resp, err := handler(ctx, req)
-		if err != nil {
-			logger.Errorf("Method %s encountered error: %v", info.FullMethod, err)
-		}
-		// Logging or other middleware logic comes here...
-		return resp, err
-	}
 }
