@@ -1,0 +1,15 @@
+
+syntax = "proto3";
+
+package api.whrmi.v1;
+
+// import "errors/errors.proto";
+
+option go_package = "github.com/s-yakubovskiy/whereami/api/whrmi/v1;whrmi";
+option java_multiple_files = true;
+option java_package = "api.whrmi.v1";
+
+enum ErrorReason {
+  IP_NOT_FOUND = 0;
+  SERVER_FAULT = 1;
+}

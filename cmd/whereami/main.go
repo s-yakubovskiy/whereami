@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/s-yakubovskiy/whereami/cmd/cmd"
-	"github.com/s-yakubovskiy/whereami/config"
+	"github.com/s-yakubovskiy/whereami/cmd/whereami/cmd"
+	"github.com/s-yakubovskiy/whereami/internal/config"
 )
 
 var Version string
