@@ -74,5 +74,7 @@ server:
     address: 0.0.0.0:8010
     timeout: 2s
   grpc:
-    address: 0.0.0.0:8011
+    address: 0.0.0.0:8012
     timeout: 2s
+  metrics:
+    address: 0.0.0.0:8018

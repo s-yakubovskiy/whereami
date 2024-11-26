@@ -3,10 +3,15 @@ package server
 import (
 	"context"
 	"net"
+	"net/http"
 
+	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/s-yakubovskiy/whereami/api/whrmi/v1"
 	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
+	"github.com/s-yakubovskiy/whereami/internal/metrics"
 	"github.com/s-yakubovskiy/whereami/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -19,27 +24,56 @@ type GrpcSrv struct {
 	logger     logging.Logger
 }
 
-// NewGrpcSrv initializes the gRPC server and returns a CustomServer instance
+// NewGrpcSrv initializes the gRPC server
 func NewGrpcSrv(
 	cfg *config.Server,
 	logger logging.Logger,
-	zoshService *service.ZoshService,
+	zoshService *service.ZoshService, // Replace with actual ZoshService implementation
+	locationService *service.LocationShowService, // Replace with actual LocationService implementation
 ) (*GrpcSrv, error) {
 	lis, err := net.Listen("tcp", cfg.GRPC.Address)
 	if err != nil {
-		logger.Errorf("failed to listen on address %s: %w", cfg.GRPC.Address, err)
+		logger.Errorf("failed to listen on address %s: %v", cfg.GRPC.Address, err)
 		return nil, err
 	}
-	logger.Debugf("gRPC server initially setup on %s", cfg.GRPC.Address)
+
+	// Initialize Prometheus gRPC metrics
+	grpcMetrics := grpcprometheus.NewServerMetrics()
+	metrics.RegisterMetrics() // Register custom metrics
 
 	var serverOptions []grpc.ServerOption
-	unaryInterceptor := loggingUnaryServerInterceptor(logger)
-	serverOptions = append(serverOptions, grpc.UnaryInterceptor(unaryInterceptor))
+	serverOptions = append(serverOptions, grpc.UnaryInterceptor(
+		grpcmiddleware.ChainUnaryServer(
+			grpcMetrics.UnaryServerInterceptor(),  // Prometheus interceptor
+			loggingUnaryServerInterceptor(logger), // Logging interceptor
+			customMetricsInterceptor(logger),      // Custom metrics interceptor
+		),
+	))
+
+	serverOptions = append(serverOptions, grpc.StreamInterceptor(
+		grpcmiddleware.ChainStreamServer(
+			grpcMetrics.StreamServerInterceptor(), // Prometheus interceptor for streams
+		),
+	))
 
 	srv := grpc.NewServer(serverOptions...)
 	reflection.Register(srv)
 
+	// Register your gRPC services here
 	whrmi.RegisterZoshServiceServer(srv, zoshService)
+	whrmi.RegisterLocationServiceServer(srv, locationService)
+
+	// Initialize default Prometheus gRPC metrics
+	grpcMetrics.InitializeMetrics(srv)
+
+	// Start Prometheus HTTP server
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		logger.Infof("Metrics server running on %s", cfg.Metrics.Address)
+		if err := http.ListenAndServe(cfg.Metrics.Address, nil); err != nil {
+			logger.Fatalf("Metrics server failed: %v", err)
+		}
+	}()
 
 	return &GrpcSrv{
 		grpcServer: srv,
@@ -48,9 +82,9 @@ func NewGrpcSrv(
 	}, nil
 }
 
-// Serve starts the gRPC server; should be called after server is initialized
+// ServeSync starts the gRPC server synchronously
 func (cs *GrpcSrv) ServeSync() error {
-	cs.logger.Printf("Starting gRPC server serve process...")
+	cs.logger.Infof("Starting gRPC server on %s", cs.listener.Addr())
 	if err := cs.grpcServer.Serve(cs.listener); err != nil {
 		cs.logger.Fatalf("failed to serve: %v", err)
 		return err
@@ -58,18 +92,17 @@ func (cs *GrpcSrv) ServeSync() error {
 	return nil
 }
 
+// Serve starts the gRPC server with graceful shutdown
 func (cs *GrpcSrv) Serve(ctx context.Context) error {
 	go func() {
-		cs.logger.Printf("Starting gRPC server serve process...")
-
+		cs.logger.Infof("Starting gRPC server on %s", cs.listener.Addr())
 		if err := cs.grpcServer.Serve(cs.listener); err != nil {
 			cs.logger.Fatalf("failed to serve: %v", err)
 		}
 	}()
 
-	// Listen for cancellation and shut down gracefully
 	<-ctx.Done()
-	cs.logger.Printf("Stopping gRPC server...")
+	cs.logger.Infof("Stopping gRPC server...")
 	cs.grpcServer.GracefulStop()
 	return nil
 }

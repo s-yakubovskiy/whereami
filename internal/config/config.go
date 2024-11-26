@@ -28,9 +28,15 @@ type AppConfig struct {
 }
 
 type Server struct {
-	HTTP HTTP `mapstructure:"http"`
-	GRPC GRPC `mapstructure:"grpc"`
+	HTTP    HTTP    `mapstructure:"http"`
+	GRPC    GRPC    `mapstructure:"grpc"`
+	Metrics Metrics `mapstructure:"metrics"`
 }
+
+type Metrics struct {
+	Address string `mapstructure:"address"`
+}
+
 type HTTP struct {
 	Address string        `mapstructure:"address"`
 	Timeout time.Duration `mapstructure:"timeout"`

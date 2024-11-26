@@ -51,7 +51,7 @@ func initializeRealShowApp() (*App, func(), error) {
 	locationKeeperService := service.NewLocationKeeperService(keeperUseCase)
 	configServer := config.ProvideServerConfig(appConfig)
 	zoshService := service.NewZoshService()
-	grpcSrv, err := server.NewGrpcSrv(configServer, logger, zoshService)
+	grpcSrv, err := server.NewGrpcSrv(configServer, logger, zoshService, locationShowService)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -91,7 +91,7 @@ func initializeMockShowApp() (*App, func(), error) {
 	locationKeeperService := service.NewLocationKeeperService(keeperUseCase)
 	configServer := config.ProvideServerConfig(appConfig)
 	zoshService := service.NewZoshService()
-	grpcSrv, err := server.NewGrpcSrv(configServer, logger, zoshService)
+	grpcSrv, err := server.NewGrpcSrv(configServer, logger, zoshService, locationShowService)
 	if err != nil {
 		return nil, nil, err
 	}

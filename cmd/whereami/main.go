@@ -17,7 +17,5 @@ func init() {
 // 3. curl -v http://api.airvisual.com/v2/nearest_city\?lat=59.655065167\&lon=56.787904833\&key=API_KEY
 
 func main() {
-	// fmt.Printf("%+v\n", config.Cfg)
-	// os.Exit(0)
 	cmd.Execute()
 }

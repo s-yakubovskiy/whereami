@@ -11,7 +11,12 @@ import "google/api/annotations.proto";
 // import "google/protobuf/timestamp.proto";
 
 service LocationService {
-    rpc ShowLocation (ShowLocationRequest) returns (ShowLocationResponse);
+    rpc ShowLocation (ShowLocationRequest) returns (ShowLocationResponse) {
+      option (google.api.http) = {
+        get: "/v1/whrmi/location"
+        response_body: "*"
+      };
+    };
     rpc GetLocation (GetLocationRequest) returns (GetLocationResponse);
 }
 
@@ -27,7 +32,7 @@ service LocationKeeperService {
 service ZoshService {
   rpc Live (LiveRequest) returns (LiveResponse) {
     option (google.api.http) = {
-      get: "v1/live"
+      get: "/v1/whrmi/live"
       response_body: "*"
     };
   };
