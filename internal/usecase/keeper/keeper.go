@@ -163,7 +163,7 @@ func (uc *UseCase) StoreLocation(ctx context.Context, location *entity.Location)
 	}
 
 	// Record metrics
-	uc.m.IncrementCounter("custom_task_count", map[string]string{"status": "success"})
-	uc.m.ObserveLatency("custom_task_latency", time.Since(start), map[string]string{"task_type": "StoreLocation"})
+	uc.m.IncrementCounter("task_count", map[string]string{"status": "success", "task_type": "StoreLocation"})
+	uc.m.ObserveLatency("task_latency", time.Since(start), map[string]string{"task_type": "StoreLocation"})
 	return nil
 }

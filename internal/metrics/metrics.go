@@ -35,6 +35,24 @@ func NewPrometheusMetrics() Metrics {
 	}
 }
 
+func (m *prometheusMetrics) mergeLabels(customLabels map[string]string) map[string]string {
+	mergedLabels := GetGlobalLabels() // Get global labels
+	for k, v := range customLabels {
+		mergedLabels[k] = v
+	}
+	return mergedLabels
+}
+
+// mergeGlobalLabels adds global label keys to custom label keys for registration
+func mergeGlobalLabels(customLabels []string) []string {
+	globalLabels := GetGlobalLabels() // Global labels defined elsewhere
+	keys := make([]string, 0, len(globalLabels)+len(customLabels))
+	for k := range globalLabels {
+		keys = append(keys, k)
+	}
+	return append(keys, customLabels...)
+}
+
 func (m *prometheusMetrics) IncrementCounter(name string, labels map[string]string) error {
 	m.mu.RLock()
 	counter, exists := m.counters[name]
@@ -42,7 +60,8 @@ func (m *prometheusMetrics) IncrementCounter(name string, labels map[string]stri
 	if !exists {
 		return errors.New("counter not registered")
 	}
-	counter.With(labels).Inc()
+	mergedLabels := m.mergeLabels(labels)
+	counter.With(mergedLabels).Inc()
 	return nil
 }
 
@@ -53,43 +72,36 @@ func (m *prometheusMetrics) ObserveLatency(name string, duration time.Duration, 
 	if !exists {
 		return errors.New("histogram not registered")
 	}
-	histogram.With(labels).Observe(duration.Seconds())
+	mergedLabels := m.mergeLabels(labels)
+	histogram.With(mergedLabels).Observe(duration.Seconds())
 	return nil
 }
 
+// Updated RegisterCounter method
 func (m *prometheusMetrics) RegisterCounter(name, help string, labelKeys []string) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	if _, exists := m.counters[name]; exists {
-		return errors.New("counter already registered")
-	}
+	mergedKeys := mergeGlobalLabels(labelKeys)
 	counter := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: Namespace,
-			Name:      name,
-			Help:      help,
+			Name: name,
+			Help: help,
 		},
-		labelKeys,
+		mergedKeys,
 	)
 	m.counters[name] = counter
 	prometheus.MustRegister(counter)
 	return nil
 }
 
+// Updated RegisterHistogram method
 func (m *prometheusMetrics) RegisterHistogram(name, help string, labelKeys []string) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	if _, exists := m.histograms[name]; exists {
-		return errors.New("histogram already registered")
-	}
+	mergedKeys := mergeGlobalLabels(labelKeys)
 	histogram := prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Namespace: Namespace,
-			Name:      name,
-			Help:      help,
-			Buckets:   prometheus.DefBuckets,
+			Name:    name,
+			Help:    help,
+			Buckets: prometheus.DefBuckets,
 		},
-		labelKeys,
+		mergedKeys,
 	)
 	m.histograms[name] = histogram
 	prometheus.MustRegister(histogram)

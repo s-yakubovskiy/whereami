@@ -3,8 +3,7 @@ GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
 COMMIT=$(shell git rev-parse --short HEAD)
 
-SERVICE_NAME ?= $(shell basename $(CURDIR)) # this can be changed if service name doesn't match with current directory
-# SERVICE_NAME ?=whereami# this can be changed if service name doesn't match with current directory
+SERVICE_NAME ?= $(shell basename $(CURDIR))
 
 # gRPC Tools
 PROTOC := protoc
@@ -14,12 +13,9 @@ PROTO_DIR := ./api/whrmi/v1
 PROTO_FILE := $(PROTO_DIR)/*.proto
 PROTO_OUT := ./api/whrmi/v1
 
-.PHONY: init build lint install install-grpc generate-proto
+.PHONY: init build lint install install-grpc generate-proto api
 
 ifeq ($(GOHOSTOS), windows)
-	#the `find.exe` is different from `find` in bash/shell.
-	#to see https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/find.
-	#changed to use git-bash.exe to run find cli or other cli friendly, caused of every developer has a Git.
 	Git_Bash= $(subst cmd\,bin\bash.exe,$(dir $(shell where git)))
 	INTERNAL_PROTO_FILES=$(shell $(Git_Bash) -c "find internal -name *.proto")
 	API_PROTO_FILES=$(shell $(Git_Bash) -c "find api -name *.proto")
@@ -29,24 +25,26 @@ else
 endif
 
 
-install-grpc:
-	@if [ ! -f "$(PROTOC_GEN_GO)" ]; then \
-		echo "Installing protoc-gen-go..."; \
-		$(GO) install google.golang.org/protobuf/cmd/protoc-gen-go@latest; \
-	fi
-	@if [ ! -f "$(PROTOC_GEN_GO_GRPC)" ]; then \
-		echo "Installing protoc-gen-go-grpc..."; \
-		$(GO) install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest; \
-	fi
+init:
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
 
 # Generate gRPC code from proto files
-generate-proto: install-grpc
+api:
 	$(PROTOC) --proto_path=$(PROTO_DIR) \
 		--proto_path=./third_party \
 		--go_out=$(PROTO_OUT) --go_opt=paths=source_relative \
 		--go-grpc_out=$(PROTO_OUT) --go-grpc_opt=paths=source_relative \
 		$(PROTO_FILE)
 
+# Generate wire_gen
+generate:
+	go mod tidy
+	go get github.com/google/wire/cmd/wire@latest
+	go generate ./internal/di
+
+all: api generate
 
 # api:
 # 	protoc --proto_path=./api \

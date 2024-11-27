@@ -41,7 +41,7 @@ func initializeRealShowApp() (*App, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	metricsMetrics := metrics.NewPrometheusMetrics()
+	metricsMetrics := metrics.ProvideMetrics()
 	useCase := locator.NewLocatorUserCase(logger, appConfig, ifconfigMe, ipApi, ipQualityScore, metricsMetrics)
 	locationShowService := service.NewLocationShowService(useCase)
 	locationKeeper, err := data.ProvideLocationKeeper(appConfig)
@@ -82,7 +82,7 @@ func initializeMockShowApp() (*App, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	metricsMetrics := metrics.NewPrometheusMetrics()
+	metricsMetrics := metrics.ProvideMetrics()
 	useCase := locator.NewLocatorUserCase(logger, appConfig, ifconfigMeMock, ipApiMock, ipQualityScoreMock, metricsMetrics)
 	locationShowService := service.NewLocationShowService(useCase)
 	locationKeeper, err := data.ProvideLocationKeeper(appConfig)
