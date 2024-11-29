@@ -451,7 +451,9 @@ var LocationKeeperService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	ZoshService_Live_FullMethodName = "/api.whrmi.v1.ZoshService/Live"
+	ZoshService_Live_FullMethodName    = "/api.whrmi.v1.ZoshService/Live"
+	ZoshService_Version_FullMethodName = "/api.whrmi.v1.ZoshService/Version"
+	ZoshService_Config_FullMethodName  = "/api.whrmi.v1.ZoshService/Config"
 )
 
 // ZoshServiceClient is the client API for ZoshService service.
@@ -459,6 +461,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ZoshServiceClient interface {
 	Live(ctx context.Context, in *LiveRequest, opts ...grpc.CallOption) (*LiveResponse, error)
+	Version(ctx context.Context, in *VersionRequest, opts ...grpc.CallOption) (*VersionResponse, error)
+	Config(ctx context.Context, in *ConfigRequest, opts ...grpc.CallOption) (*ConfigResponse, error)
 }
 
 type zoshServiceClient struct {
@@ -479,11 +483,33 @@ func (c *zoshServiceClient) Live(ctx context.Context, in *LiveRequest, opts ...g
 	return out, nil
 }
 
+func (c *zoshServiceClient) Version(ctx context.Context, in *VersionRequest, opts ...grpc.CallOption) (*VersionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VersionResponse)
+	err := c.cc.Invoke(ctx, ZoshService_Version_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *zoshServiceClient) Config(ctx context.Context, in *ConfigRequest, opts ...grpc.CallOption) (*ConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ConfigResponse)
+	err := c.cc.Invoke(ctx, ZoshService_Config_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ZoshServiceServer is the server API for ZoshService service.
 // All implementations must embed UnimplementedZoshServiceServer
 // for forward compatibility.
 type ZoshServiceServer interface {
 	Live(context.Context, *LiveRequest) (*LiveResponse, error)
+	Version(context.Context, *VersionRequest) (*VersionResponse, error)
+	Config(context.Context, *ConfigRequest) (*ConfigResponse, error)
 	mustEmbedUnimplementedZoshServiceServer()
 }
 
@@ -496,6 +522,12 @@ type UnimplementedZoshServiceServer struct{}
 
 func (UnimplementedZoshServiceServer) Live(context.Context, *LiveRequest) (*LiveResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Live not implemented")
+}
+func (UnimplementedZoshServiceServer) Version(context.Context, *VersionRequest) (*VersionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Version not implemented")
+}
+func (UnimplementedZoshServiceServer) Config(context.Context, *ConfigRequest) (*ConfigResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Config not implemented")
 }
 func (UnimplementedZoshServiceServer) mustEmbedUnimplementedZoshServiceServer() {}
 func (UnimplementedZoshServiceServer) testEmbeddedByValue()                     {}
@@ -536,6 +568,42 @@ func _ZoshService_Live_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ZoshService_Version_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VersionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ZoshServiceServer).Version(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ZoshService_Version_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ZoshServiceServer).Version(ctx, req.(*VersionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ZoshService_Config_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ZoshServiceServer).Config(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ZoshService_Config_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ZoshServiceServer).Config(ctx, req.(*ConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ZoshService_ServiceDesc is the grpc.ServiceDesc for ZoshService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -546,6 +614,14 @@ var ZoshService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Live",
 			Handler:    _ZoshService_Live_Handler,
+		},
+		{
+			MethodName: "Version",
+			Handler:    _ZoshService_Version_Handler,
+		},
+		{
+			MethodName: "Config",
+			Handler:    _ZoshService_Config_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

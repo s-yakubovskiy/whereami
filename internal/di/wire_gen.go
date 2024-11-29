@@ -11,12 +11,14 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/data"
 	"github.com/s-yakubovskiy/whereami/internal/data/ifconfig"
 	"github.com/s-yakubovskiy/whereami/internal/data/vpn"
+	"github.com/s-yakubovskiy/whereami/internal/data/zosh"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
 	"github.com/s-yakubovskiy/whereami/internal/metrics"
 	"github.com/s-yakubovskiy/whereami/internal/server"
 	"github.com/s-yakubovskiy/whereami/internal/service"
 	"github.com/s-yakubovskiy/whereami/internal/usecase/keeper"
 	"github.com/s-yakubovskiy/whereami/internal/usecase/locator"
+	"github.com/s-yakubovskiy/whereami/internal/usecase/zosher"
 )
 
 // Injectors from wire.go:
@@ -52,7 +54,9 @@ func initializeRealShowApp() (*App, func(), error) {
 	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper, netLinksLister, metricsMetrics)
 	locationKeeperService := service.NewLocationKeeperService(keeperUseCase)
 	configServer := config.ProvideServerConfig(appConfig)
-	zoshService := service.NewZoshService()
+	zoshVersion := zosh.NewZoshVersion()
+	zosherUseCase := zosher.NewZoshUseCase(logger, appConfig, metricsMetrics, zoshVersion)
+	zoshService := service.NewZoshService(zosherUseCase)
 	grpcSrv, err := server.NewGrpcSrv(configServer, logger, zoshService, locationShowService)
 	if err != nil {
 		return nil, nil, err
@@ -93,7 +97,9 @@ func initializeMockShowApp() (*App, func(), error) {
 	keeperUseCase := keeper.NewLocationKeeperUseCase(logger, appConfig, locationKeeper, netLinksLister, metricsMetrics)
 	locationKeeperService := service.NewLocationKeeperService(keeperUseCase)
 	configServer := config.ProvideServerConfig(appConfig)
-	zoshService := service.NewZoshService()
+	zoshVersion := zosh.NewZoshVersion()
+	zosherUseCase := zosher.NewZoshUseCase(logger, appConfig, metricsMetrics, zoshVersion)
+	zoshService := service.NewZoshService(zosherUseCase)
 	grpcSrv, err := server.NewGrpcSrv(configServer, logger, zoshService, locationShowService)
 	if err != nil {
 		return nil, nil, err

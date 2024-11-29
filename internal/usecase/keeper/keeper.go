@@ -51,8 +51,8 @@ type LocationKeeperRepo interface {
 
 func NewLocationKeeperUseCase(log logging.Logger, cfg *config.AppConfig, lk LocationKeeperRepo, nl NetLinksRepo, m metrics.Metrics) *UseCase {
 	// Register metrics specific to this use case
-	m.RegisterCounter("custom_task_count", "Counts custom task executions", []string{"status"})
-	m.RegisterHistogram("custom_task_latency", "Tracks custom task latencies", []string{"task_type"})
+	m.RegisterCounter("task_count", "Counts custom task executions", []string{"status"})
+	m.RegisterHistogram("task_latency", "Tracks custom task latencies", []string{"task_type"})
 
 	return &UseCase{
 		cfg: cfg,

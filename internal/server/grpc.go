@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"net/http"
+	"reflect"
 
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
@@ -15,6 +16,9 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	pb "github.com/s-yakubovskiy/zoshlib/api/zosh/v1"
+	zl "github.com/s-yakubovskiy/zoshlib/service"
 )
 
 const (
@@ -62,11 +66,16 @@ func NewGrpcSrv(
 	))
 
 	srv := grpc.NewServer(serverOptions...)
+
 	reflection.Register(srv)
 
 	// Register your gRPC services here
 	whrmi.RegisterZoshServiceServer(srv, zoshService)
 	whrmi.RegisterLocationServiceServer(srv, locationService)
+
+	zoshUseCase := zl.NewZoshUseCase(structToMap(&config.Cfg))
+	zoshlibService := zl.NewZoshService(zoshUseCase)
+	pb.RegisterZoshServiceServer(srv, zoshlibService)
 
 	// Initialize default Prometheus gRPC metrics
 	grpcMetrics.InitializeMetrics(srv)
@@ -117,4 +126,17 @@ func (cs *GrpcSrv) Serve(ctx context.Context) error {
 	cs.logger.Infof("Stopping gRPC server...")
 	cs.grpcServer.GracefulStop()
 	return nil
+}
+
+func structToMap(obj interface{}) map[string]interface{} {
+	val := reflect.ValueOf(obj).Elem()
+	typ := val.Type()
+	result := make(map[string]interface{})
+
+	for i := 0; i < val.NumField(); i++ {
+		field := typ.Field(i)
+		value := val.Field(i).Interface()
+		result[field.Name] = value
+	}
+	return result
 }

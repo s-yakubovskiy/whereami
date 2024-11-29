@@ -8,21 +8,16 @@ import (
 	// "github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/mbndr/figlet4go"
 	"github.com/s-yakubovskiy/whereami/internal/config"
+	"github.com/s-yakubovskiy/whereami/internal/data/zosh"
 	"github.com/s-yakubovskiy/whereami/internal/di"
 	"github.com/spf13/cobra"
 )
 
 const appName = "whrmi"
 
-// version overrides
-var (
-	Version     string
-	Commit      string
-	showVersion bool
-)
-
 // public flags for whrmi
 var (
+	showVersion bool
 	fullShow    bool
 	locationApi string
 	publicIpApi string
@@ -37,12 +32,9 @@ var rootCmd = &cobra.Command{
 	Short: "WhereAmI is an application to find your geolocation based on your IP",
 	Long:  `WhereAmI is a CLI application that allows users to find their geolocation based on their public IP address.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// cfg := &config.Cfg
 		introduce()
 		if showVersion {
-			fmt.Println("\nBuild Info:")
-			fmt.Println("  Version:", Version)
-			fmt.Println("  Commit:", Commit)
+			zosh.NewZoshVersion().PrintVersion()
 			os.Exit(0)
 		}
 	},

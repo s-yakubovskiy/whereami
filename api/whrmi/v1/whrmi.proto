@@ -7,6 +7,7 @@ option java_multiple_files = true;
 option java_package = "api.whrmi.v1";
 
 import "google/api/annotations.proto";
+import "google/protobuf/struct.proto";
 // import "validate/validate.proto";
 // import "google/protobuf/timestamp.proto";
 
@@ -36,11 +37,35 @@ service ZoshService {
       response_body: "*"
     };
   };
+  rpc Version (VersionRequest) returns (VersionResponse) {
+    option (google.api.http) = {
+      get: "/v1/whrmi/version"
+      response_body: "*"
+    };
+  };
+  rpc Config (ConfigRequest) returns (ConfigResponse) {
+    option (google.api.http) = {
+      get: "/v1/whrmi/config"
+      response_body: "*"
+    };
+  };
 }
 
 message LiveRequest {}
 message LiveResponse {
     string message = 1;
+}
+
+message VersionRequest {}
+message VersionResponse {
+    string version = 1;
+    string date = 2;
+    string commit = 3;
+}
+message ConfigRequest {}
+message ConfigResponse {
+    // string config_json = 1;
+    google.protobuf.Struct config = 1;
 }
 
 

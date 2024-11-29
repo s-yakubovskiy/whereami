@@ -12,6 +12,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/data/ipapi"
 	"github.com/s-yakubovskiy/whereami/internal/data/ipqualityscore"
 	"github.com/s-yakubovskiy/whereami/internal/data/vpn"
+	"github.com/s-yakubovskiy/whereami/internal/data/zosh"
 	"github.com/s-yakubovskiy/whereami/internal/logging"
 	"github.com/s-yakubovskiy/whereami/internal/metrics"
 	"github.com/s-yakubovskiy/whereami/internal/server"
@@ -19,6 +20,7 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/usecase"
 	"github.com/s-yakubovskiy/whereami/internal/usecase/keeper"
 	"github.com/s-yakubovskiy/whereami/internal/usecase/locator"
+	"github.com/s-yakubovskiy/whereami/internal/usecase/zosher"
 )
 
 // InitializeApp sets up the full application with all dependencies.
@@ -45,6 +47,7 @@ func initializeRealShowApp() (*App, func(), error) {
 		wire.Bind(new(locator.IpInfoRepo), new(*ipapi.IpApi)),
 		wire.Bind(new(keeper.LocationKeeperRepo), new(*db.LocationKeeper)),
 		wire.Bind(new(locator.IpQualityScoreRepo), new(*ipqualityscore.IpQualityScore)),
+		wire.Bind(new(zosher.ZoshRepo), new(*zosh.ZoshVersion)),
 		NewShowApp,
 	)
 	return &App{}, nil, nil
@@ -67,6 +70,7 @@ func initializeMockShowApp() (*App, func(), error) {
 		wire.Bind(new(keeper.LocationKeeperRepo), new(*db.LocationKeeper)),
 
 		wire.Bind(new(locator.IpQualityScoreRepo), new(*ipqualityscore.IpQualityScoreMock)),
+		wire.Bind(new(zosher.ZoshRepo), new(*zosh.ZoshVersion)),
 		NewShowApp,
 	)
 	return &App{}, nil, nil
