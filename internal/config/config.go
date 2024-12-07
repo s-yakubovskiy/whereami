@@ -28,13 +28,8 @@ type AppConfig struct {
 }
 
 type Server struct {
-	HTTP    HTTP    `mapstructure:"http"`
-	GRPC    GRPC    `mapstructure:"grpc"`
-	Metrics Metrics `mapstructure:"metrics"`
-}
-
-type Metrics struct {
-	Address string `mapstructure:"address"`
+	HTTP HTTP `mapstructure:"http"`
+	GRPC GRPC `mapstructure:"grpc"`
 }
 
 type HTTP struct {

@@ -36,7 +36,7 @@ func initializeAppOnce(cmd *cobra.Command) error {
 	initOnce.Do(func() {
 		app, _, _, err = initializeApp(cmd)
 	})
-	go app.Gs.ServeSync()
+	go app.Gs.Serve(app.NewContext())
 	return err
 }
 

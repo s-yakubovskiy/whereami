@@ -57,11 +57,11 @@ func initializeRealShowApp() (*App, func(), error) {
 	zoshVersion := zosh.NewZoshVersion()
 	zosherUseCase := zosher.NewZoshUseCase(logger, appConfig, metricsMetrics, zoshVersion)
 	zoshService := service.NewZoshService(zosherUseCase)
-	grpcSrv, err := server.NewGrpcSrv(configServer, logger, zoshService, locationShowService)
+	grpcGatewaySrv, err := server.NewGrpcGatewaySrv(configServer, logger, zoshService, locationShowService)
 	if err != nil {
 		return nil, nil, err
 	}
-	app := NewShowApp(logger, appConfig, locationShowService, locationKeeperService, grpcSrv)
+	app := NewShowApp(logger, appConfig, locationShowService, locationKeeperService, grpcGatewaySrv)
 	return app, func() {
 	}, nil
 }
@@ -100,11 +100,11 @@ func initializeMockShowApp() (*App, func(), error) {
 	zoshVersion := zosh.NewZoshVersion()
 	zosherUseCase := zosher.NewZoshUseCase(logger, appConfig, metricsMetrics, zoshVersion)
 	zoshService := service.NewZoshService(zosherUseCase)
-	grpcSrv, err := server.NewGrpcSrv(configServer, logger, zoshService, locationShowService)
+	grpcGatewaySrv, err := server.NewGrpcGatewaySrv(configServer, logger, zoshService, locationShowService)
 	if err != nil {
 		return nil, nil, err
 	}
-	app := NewShowApp(logger, appConfig, locationShowService, locationKeeperService, grpcSrv)
+	app := NewShowApp(logger, appConfig, locationShowService, locationKeeperService, grpcGatewaySrv)
 	return app, func() {
 	}, nil
 }

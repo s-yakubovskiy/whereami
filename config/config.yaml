@@ -71,7 +71,8 @@ crontab_tasks:
 
 server:
   grpc:
-    address: 0.0.0.0:9010
+    address: 0.0.0.0:9090
     timeout: 2s
-  metrics:
-    address: 0.0.0.0:9011
+  http:
+    address: 0.0.0.0:9080
+    timeout: 2s

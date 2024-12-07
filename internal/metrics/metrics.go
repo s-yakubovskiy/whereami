@@ -82,8 +82,9 @@ func (m *prometheusMetrics) RegisterCounter(name, help string, labelKeys []strin
 	mergedKeys := mergeGlobalLabels(labelKeys)
 	counter := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: name,
-			Help: help,
+			Name:      name,
+			Namespace: Namespace,
+			Help:      help,
 		},
 		mergedKeys,
 	)
@@ -97,9 +98,10 @@ func (m *prometheusMetrics) RegisterHistogram(name, help string, labelKeys []str
 	mergedKeys := mergeGlobalLabels(labelKeys)
 	histogram := prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    name,
-			Help:    help,
-			Buckets: prometheus.DefBuckets,
+			Name:      name,
+			Namespace: Namespace,
+			Help:      help,
+			Buckets:   prometheus.DefBuckets,
 		},
 		mergedKeys,
 	)

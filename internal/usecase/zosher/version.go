@@ -2,15 +2,15 @@ package zosher
 
 import (
 	"github.com/s-yakubovskiy/whereami/internal/config"
-	"github.com/s-yakubovskiy/whereami/internal/logging"
 	"github.com/s-yakubovskiy/whereami/internal/metrics"
+	"github.com/s-yakubovskiy/whereami/pkg/shudralogs"
 )
 
 // var _ LocationKeeperRepo = &db.LocationKeeper{}
 
 type UseCase struct {
 	cfg *config.AppConfig
-	log logging.Logger
+	log shudralogs.Logger
 	m   metrics.Metrics
 	z   ZoshRepo
 }
@@ -27,7 +27,7 @@ type ZoshRepo interface {
 	GetDate() string
 }
 
-func NewZoshUseCase(log logging.Logger, cfg *config.AppConfig, m metrics.Metrics, z ZoshRepo) *UseCase {
+func NewZoshUseCase(log shudralogs.Logger, cfg *config.AppConfig, m metrics.Metrics, z ZoshRepo) *UseCase {
 	// Register metrics specific to this use case
 	// m.RegisterCounter("task_count", "Counts custom task executions", []string{"status"})
 	// m.RegisterHistogram("task_latency", "Tracks custom task latencies", []string{"task_type"})

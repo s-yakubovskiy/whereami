@@ -2,13 +2,14 @@ package server
 
 import (
 	"context"
+	"reflect"
 
-	"github.com/s-yakubovskiy/whereami/internal/logging"
+	"github.com/s-yakubovskiy/whereami/pkg/shudralogs"
 	"google.golang.org/grpc"
 )
 
 // Sample UnaryServerInterceptor implementation for logging
-func loggingUnaryServerInterceptor(logger logging.Logger) grpc.UnaryServerInterceptor {
+func loggingUnaryServerInterceptor(logger shudralogs.Logger) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req interface{},
@@ -23,4 +24,17 @@ func loggingUnaryServerInterceptor(logger logging.Logger) grpc.UnaryServerInterc
 		// Logging or other middleware logic comes here...
 		return resp, err
 	}
+}
+
+func structToMap(obj interface{}) map[string]interface{} {
+	val := reflect.ValueOf(obj).Elem()
+	typ := val.Type()
+	result := make(map[string]interface{})
+
+	for i := 0; i < val.NumField(); i++ {
+		field := typ.Field(i)
+		value := val.Field(i).Interface()
+		result[field.Name] = value
+	}
+	return result
 }

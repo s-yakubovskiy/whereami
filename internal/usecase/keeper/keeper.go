@@ -10,15 +10,15 @@ import (
 	"github.com/s-yakubovskiy/whereami/internal/config"
 	"github.com/s-yakubovskiy/whereami/internal/data/db"
 	"github.com/s-yakubovskiy/whereami/internal/entity"
-	"github.com/s-yakubovskiy/whereami/internal/logging"
 	"github.com/s-yakubovskiy/whereami/internal/metrics"
+	"github.com/s-yakubovskiy/whereami/pkg/shudralogs"
 )
 
 var _ LocationKeeperRepo = &db.LocationKeeper{}
 
 type UseCase struct {
 	cfg *config.AppConfig
-	log logging.Logger
+	log shudralogs.Logger
 	lk  LocationKeeperRepo
 	nl  NetLinksRepo
 	m   metrics.Metrics
@@ -49,7 +49,7 @@ type LocationKeeperRepo interface {
 	StoreLocation(*entity.Location) error
 }
 
-func NewLocationKeeperUseCase(log logging.Logger, cfg *config.AppConfig, lk LocationKeeperRepo, nl NetLinksRepo, m metrics.Metrics) *UseCase {
+func NewLocationKeeperUseCase(log shudralogs.Logger, cfg *config.AppConfig, lk LocationKeeperRepo, nl NetLinksRepo, m metrics.Metrics) *UseCase {
 	// Register metrics specific to this use case
 	m.RegisterCounter("task_count", "Counts custom task executions", []string{"status"})
 	m.RegisterHistogram("task_latency", "Tracks custom task latencies", []string{"task_type"})

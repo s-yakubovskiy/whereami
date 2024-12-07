@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/s-yakubovskiy/whereami/internal/config"
+	"github.com/s-yakubovskiy/whereami/pkg/shudralogs"
 
 	"github.com/s-yakubovskiy/whereami/internal/entity"
-	"github.com/s-yakubovskiy/whereami/internal/logging"
 	"github.com/s-yakubovskiy/whereami/internal/metrics"
 )
 
@@ -47,7 +47,7 @@ type UseCase struct {
 	publicIpRepo       PublicIpRepo
 	ipInfoRepo         IpInfoRepo
 	ipQualityScoreRepo IpQualityScoreRepo
-	log                logging.Logger
+	log                shudralogs.Logger
 	m                  metrics.Metrics
 }
 
@@ -64,7 +64,7 @@ type PublicIpRepo interface {
 	GetIP() (string, error)
 }
 
-func NewLocatorUserCase(log logging.Logger, cfg *config.AppConfig, locationRepo PublicIpRepo, ipInfoRepo IpInfoRepo, ipQualityRepo IpQualityScoreRepo, m metrics.Metrics) *UseCase {
+func NewLocatorUserCase(log shudralogs.Logger, cfg *config.AppConfig, locationRepo PublicIpRepo, ipInfoRepo IpInfoRepo, ipQualityRepo IpQualityScoreRepo, m metrics.Metrics) *UseCase {
 	// Register metrics specific to this use case
 	m.RegisterCounter("show_location_count", "Counts custom ShowLocation executions", []string{"status"})
 	m.RegisterHistogram("show_location_latency", "Tracks custom ShowLocation latencies", []string{"task_type"})

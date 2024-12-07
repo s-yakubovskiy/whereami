@@ -8,8 +8,10 @@ option java_package = "api.whrmi.v1";
 
 import "google/api/annotations.proto";
 import "google/protobuf/struct.proto";
+// import "zoshlib/zosh.proto";
 // import "validate/validate.proto";
 // import "google/protobuf/timestamp.proto";
+
 
 service LocationService {
     rpc ShowLocation (ShowLocationRequest) returns (ShowLocationResponse) {

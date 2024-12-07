@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package zosh.v1;
+
+option go_package = "github.com/s-yakubovskiy/zoshlib/api/zosh/v1;zosh";
+option java_multiple_files = true;
+option java_package = "zosh.v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/struct.proto";
+
+service ZoshService {
+  rpc Live (LiveRequest) returns (LiveResponse) {
+    option (google.api.http) = {
+      get: "/zosh/live"
+    };
+  }
+
+  rpc Version (VersionRequest) returns (VersionResponse) {
+    option (google.api.http) = {
+      get: "/zosh/version"
+    };
+  }
+
+  rpc Config (ConfigRequest) returns (ConfigResponse) {
+    option (google.api.http) = {
+      get: "/zosh/config"
+    };
+  }
+}
+
+message LiveRequest {}
+message LiveResponse {
+  string message = 1;
+}
+
+message VersionRequest {}
+message VersionResponse {
+  string version = 1;
+  string commit = 2;
+  string date = 3;
+}
+
+message ConfigRequest {}
+message ConfigResponse {
+  google.protobuf.Struct config = 1;
+}
